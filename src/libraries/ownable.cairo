@@ -11,7 +11,7 @@
 //    change. We need to maintain storage backward compatibility;
 // 4. Our re-implementation here is more flexible by abstracting away storage and events.
 
-use core::num::traits::{Bounded, Zero};
+use core::num::traits::Zero;
 
 use starknet::{ContractAddress, contract_address_const, get_caller_address};
 

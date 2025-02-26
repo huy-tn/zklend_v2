@@ -673,52 +673,52 @@ pub fn ten_pow(power: felt252) -> felt252 {
         core::panic_with_felt252(errors::DECIMALS_OUT_OF_RANGE)
     }
 }
-// #[cfg(test)]
-// mod tests {
-//     use test::test_utils::assert_eq;
+#[cfg(test)]
+mod tests {
+    // use test::test_utils::assert_eq!;
 
-//     #[test]
-//     fn test_two_pow() {
-//         assert_eq(@super::two_pow(0), @1, 'FAILED');
-//         assert_eq(@super::two_pow(1), @2, 'FAILED');
-//         assert_eq(@super::two_pow(2), @4, 'FAILED');
-//         assert_eq(@super::two_pow(3), @8, 'FAILED');
-//         assert_eq(@super::two_pow(4), @16, 'FAILED');
-//         assert_eq(@super::two_pow(5), @32, 'FAILED');
-//         assert_eq(@super::two_pow(100), @0x10000000000000000000000000, 'FAILED');
-//         assert_eq(@super::two_pow(101), @0x20000000000000000000000000, 'FAILED');
-//         assert_eq(
-//             @super::two_pow(251),
-//             @0x800000000000000000000000000000000000000000000000000000000000000,
-//             'FAILED'
-//         );
-//     }
+    #[test]
+    fn test_two_pow() {
+        assert_eq!(@super::two_pow(0), @1, "FAILED");
+        assert_eq!(@super::two_pow(1), @2, "FAILED");
+        assert_eq!(@super::two_pow(2), @4, "FAILED");
+        assert_eq!(@super::two_pow(3), @8, "FAILED");
+        assert_eq!(@super::two_pow(4), @16, "FAILED");
+        assert_eq!(@super::two_pow(5), @32, "FAILED");
+        assert_eq!(@super::two_pow(100), @0x10000000000000000000000000, "FAILED");
+        assert_eq!(@super::two_pow(101), @0x20000000000000000000000000, "FAILED");
+        assert_eq!(
+            @super::two_pow(251),
+            @0x800000000000000000000000000000000000000000000000000000000000000,
+            "FAILED"
+        );
+    }
 
-//     #[test]
-//     #[should_panic(expected: ('POW_DEC_TOO_LARGE',))]
-//     fn test_two_pow_overflow() {
-//         super::two_pow(252);
-//     }
+    #[test]
+    #[should_panic(expected: ('POW_DEC_TOO_LARGE',))]
+    fn test_two_pow_overflow() {
+        super::two_pow(252);
+    }
 
-//     #[test]
-//     fn test_ten_pow() {
-//         assert_eq(@super::ten_pow(0), @1, 'FAILED');
-//         assert_eq(@super::ten_pow(1), @10, 'FAILED');
-//         assert_eq(@super::ten_pow(2), @100, 'FAILED');
-//         assert_eq(@super::ten_pow(3), @1000, 'FAILED');
-//         assert_eq(@super::ten_pow(4), @10000, 'FAILED');
-//         assert_eq(@super::ten_pow(5), @100000, 'FAILED');
-//         assert_eq(
-//             @super::ten_pow(75),
-//             @1000000000000000000000000000000000000000000000000000000000000000000000000000,
-//             'FAILED'
-//         );
-//     }
+    #[test]
+    fn test_ten_pow() {
+        assert_eq!(@super::ten_pow(0), @1, "FAILED");
+        assert_eq!(@super::ten_pow(1), @10, "FAILED");
+        assert_eq!(@super::ten_pow(2), @100, "FAILED");
+        assert_eq!(@super::ten_pow(3), @1000, "FAILED");
+        assert_eq!(@super::ten_pow(4), @10000, "FAILED");
+        assert_eq!(@super::ten_pow(5), @100000, "FAILED");
+        assert_eq!(
+            @super::ten_pow(75),
+            @1000000000000000000000000000000000000000000000000000000000000000000000000000,
+            "FAILED"
+        );
+    }
 
-//     #[test]
-//     #[should_panic(expected: ('POW_DEC_TOO_LARGE',))]
-//     fn test_ten_pow_overflow() {
-//         super::ten_pow(76);
-//     }
-// }
+    #[test]
+    #[should_panic(expected: ('POW_DEC_TOO_LARGE',))]
+    fn test_ten_pow_overflow() {
+        super::ten_pow(76);
+    }
+}
 

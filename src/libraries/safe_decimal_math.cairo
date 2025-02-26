@@ -33,47 +33,48 @@ pub fn div_decimals(a: felt252, b: felt252, b_decimals: felt252) -> felt252 {
     let scaled_a = safe_math::mul(a, scale);
     safe_math::div(scaled_a, b)
 }
-// #[cfg(test)]
-// mod tests {
-//     use test::test_utils::assert_eq;
 
-//     #[test]
-//     fn test_mul() {
-//         assert_eq(@super::mul(10, 2000000000000000000000000000), @20, 'FAILED');
-//     }
+#[cfg(test)]
+mod tests {
+    // use test::test_utils::assert_eq!;
 
-//     #[test]
-//     fn test_mul_decimals() {
-//         assert_eq(@super::mul_decimals(10, 2000000000000000000000000000, 27), @20, 'FAILED');
-//     }
+    #[test]
+    fn test_mul() {
+        assert_eq!(@super::mul(10, 2000000000000000000000000000), @20, "FAILED");
+    }
 
-//     #[test]
-//     #[should_panic(expected: ('SM_MUL_OF',))]
-//     fn test_mul_overflow() {
-//         super::mul(
-//             0x400000000000000000000000000000000000000000000000000000000000000,
-//             2000000000000000000000000000
-//         );
-//     }
+    #[test]
+    fn test_mul_decimals() {
+        assert_eq!(@super::mul_decimals(10, 2000000000000000000000000000, 27), @20, "FAILED");
+    }
 
-//     #[test]
-//     #[should_panic(expected: ('SM_MUL_OF',))]
-//     fn test_mul_decimals_overflow() {
-//         super::mul_decimals(
-//             0x400000000000000000000000000000000000000000000000000000000000000,
-//             2000000000000000000000000000,
-//             27
-//         );
-//     }
+    #[test]
+    #[should_panic(expected: ('u256_mul Overflow',))]
+    fn test_mul_overflow() {
+        super::mul(
+            0x400000000000000000000000000000000000000000000000000000000000000,
+            2000000000000000000000000000
+        );
+    }
 
-//     #[test]
-//     fn test_div() {
-//         assert_eq(@super::div(10, 2000000000000000000000000000), @5, 'FAILED');
-//     }
+    #[test]
+    #[should_panic(expected: ('u256_mul Overflow',))]
+    fn test_mul_decimals_overflow() {
+        super::mul_decimals(
+            0x400000000000000000000000000000000000000000000000000000000000000,
+            2000000000000000000000000000,
+            27
+        );
+    }
 
-//     #[test]
-//     fn test_div_decimals() {
-//         assert_eq(@super::div_decimals(10, 2000000000000000000000000000, 27), @5, 'FAILED');
-//     }
-// }
+    #[test]
+    fn test_div() {
+        assert_eq!(@super::div(10, 2000000000000000000000000000), @5, "FAILED");
+    }
+
+    #[test]
+    fn test_div_decimals() {
+        assert_eq!(@super::div_decimals(10, 2000000000000000000000000000, 27), @5, "FAILED");
+    }
+}
 
