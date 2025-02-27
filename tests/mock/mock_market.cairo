@@ -13,10 +13,10 @@ pub mod MockMarket {
 
     #[storage]
     struct Storage {
-        lending_accumulator: LegacyMap::<ContractAddress, felt252>,
-        debt_accumulator: LegacyMap::<ContractAddress, felt252>,
-        collateral_enabled: LegacyMap::<(ContractAddress, ContractAddress), bool>,
-        user_undercollateralized: LegacyMap::<ContractAddress, bool>,
+        lending_accumulator: Map::<ContractAddress, felt252>,
+        debt_accumulator: Map::<ContractAddress, felt252>,
+        collateral_enabled: Map::<(ContractAddress, ContractAddress), bool>,
+        user_undercollateralized: Map::<ContractAddress, bool>,
         last_call_result: felt252
     }
 
