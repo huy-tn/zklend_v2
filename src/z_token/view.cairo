@@ -1,29 +1,13 @@
-// use traits::Into;
-
 use starknet::ContractAddress;
-use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
+use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess};
 use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-
-// Hack to simulate the `crate` keyword
-use super::super as crate;
 
 use crate::libraries::safe_decimal_math;
 
 use super::internal;
-
 use super::ZToken as contract;
 
 use contract::ContractState;
-
-// These are hacks that depend on compiler implementation details :(
-// But they're needed for refactoring the contract code into modules like this one.
-// use contract::allowancesContractMemberStateTrait;
-// use contract::raw_balancesContractMemberStateTrait;
-// use contract::raw_total_supplyContractMemberStateTrait;
-// use contract::token_decimalsContractMemberStateTrait;
-// use contract::token_nameContractMemberStateTrait;
-// use contract::token_symbolContractMemberStateTrait;
-// use contract::underlyingContractMemberStateTrait;
 
 pub fn name(self: @ContractState) -> felt252 {
     self.token_name.read()

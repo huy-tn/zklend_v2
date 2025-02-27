@@ -46,7 +46,7 @@ pub mod ERC20 {
         symbol: felt252,
         decimals: u8,
         initial_supply: u256,
-        recipient: ContractAddress
+        recipient: ContractAddress,
     ) {
         self.name.write(name);
         self.symbol.write(symbol);
@@ -58,9 +58,9 @@ pub mod ERC20 {
             .emit(
                 Event::Transfer(
                     Transfer {
-                        from: contract_address_const::<0>(), to: recipient, value: initial_supply
-                    }
-                )
+                        from: contract_address_const::<0>(), to: recipient, value: initial_supply,
+                    },
+                ),
             );
     }
 
@@ -87,7 +87,7 @@ pub mod ERC20 {
         }
 
         fn allowance(
-            self: @ContractState, owner: ContractAddress, spender: ContractAddress
+            self: @ContractState, owner: ContractAddress, spender: ContractAddress,
         ) -> u256 {
             self.allowances.read((owner, spender))
         }
@@ -106,7 +106,7 @@ pub mod ERC20 {
             ref self: ContractState,
             sender: ContractAddress,
             recipient: ContractAddress,
-            amount: u256
+            amount: u256,
         ) -> bool {
             let caller = get_caller_address();
 

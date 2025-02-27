@@ -1,20 +1,14 @@
-// use traits::Into;
-// use zeroable::Zeroable;
-use core::num::traits::{Bounded, Zero};
+use core::num::traits::Zero;
 
-use starknet::{ClassHash, ContractAddress, SyscallResultTrait};
+use starknet::ContractAddress;
 use starknet::event::EventEmitter;
 
-// Hack to simulate the `crate` keyword
-// use super::super as crate;
-
-use zklend_v2::interfaces::{
+use crate::interfaces::{
     IERC20Dispatcher, IERC20DispatcherTrait, IZTokenDispatcher, IZTokenDispatcherTrait,
     MarketReserveData,
 };
 use crate::libraries::{ownable, reentrancy_guard, safe_decimal_math};
 
-// use super::storage::{ReservesStorageShortcuts, ReservesStorageShortcutsImpl};
 use super::traits::{MarketOwnable, MarketReentrancyGuard};
 use super::{errors, internal};
 
@@ -24,17 +18,7 @@ use super::UpdatedAccumulators;
 use contract::ContractState;
 
 use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
-// use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-
-// These are hacks that depend on compiler implementation details :(
-// But they're needed for refactoring the contract code into modules like this one.
-// use contract::oracleContractMemberStateTrait;
-// use contract::reserve_countContractMemberStateTrait;
-// use contract::reserve_indicesContractMemberStateTrait;
-// use contract::reserve_tokensContractMemberStateTrait;
-// use contract::reservesContractMemberStateTrait;
-// use contract::treasuryContractMemberStateTrait;
+use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess};
 
 pub fn initializer(ref self: ContractState, owner: ContractAddress, oracle: ContractAddress) {
     // Temporarily disable these check

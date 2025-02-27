@@ -1,21 +1,17 @@
 use starknet::ContractAddress;
-// use starknet::syscalls::deploy_syscall;
 
 use zklend_v2::interfaces::{
     IInterestRateModelDispatcher, IMarketDispatcher, IPriceOracleSourceDispatcher,
-    ITestContractDispatcher, IZTokenDispatcher
+    ITestContractDispatcher, IZTokenDispatcher,
 };
 use zklend_v2::irms::default_interest_rate_model::DefaultInterestRateModel;
 
 use super::mock::{
-    IAccountDispatcher, IERC20Dispatcher, IFlashLoanHandlerDispatcher,
-    IMockMarketDispatcher, IMockPriceOracleDispatcher
+    IAccountDispatcher, IERC20Dispatcher, IFlashLoanHandlerDispatcher, IMockMarketDispatcher,
+    IMockPriceOracleDispatcher,
 };
 
-use snforge_std::{
-    declare, ContractClassTrait, DeclareResultTrait, start_cheat_caller_address, 
-    stop_cheat_caller_address, spy_events, EventSpyAssertionsTrait,
-};
+use snforge_std::{declare, ContractClassTrait, DeclareResultTrait};
 
 // pub fn deploy_account(salt: felt252) -> IAccountDispatcher {
 //     let (contract_address, _) = deploy_syscall(
@@ -38,18 +34,18 @@ pub fn deploy_account(salt: felt252) -> IAccountDispatcher {
     IAccountDispatcher { contract_address }
 }
 
-pub fn deploy_erc20(name: felt252, symbol: felt252, decimals: u8, initial_supply: u256, recipient: ContractAddress
+pub fn deploy_erc20(
+    name: felt252, symbol: felt252, decimals: u8, initial_supply: u256, recipient: ContractAddress,
 ) -> IERC20Dispatcher {
     let contract = declare("ERC20").unwrap().contract_class();
-    let mut calldata =  
-        array![
-            name,
-            symbol,
-            decimals.into(),
-            initial_supply.low.into(),
-            initial_supply.high.into(),
-            recipient.into()
-        ];
+    let mut calldata = array![
+        name,
+        symbol,
+        decimals.into(),
+        initial_supply.low.into(),
+        initial_supply.high.into(),
+        recipient.into(),
+    ];
 
     let (contract_address, _) = contract.deploy(@calldata).unwrap();
 
@@ -66,7 +62,6 @@ pub fn deploy_mock_price_oracle() -> IMockPriceOracleDispatcher {
 }
 
 pub fn deploy_mock_market() -> IMockMarketDispatcher {
-
     let contract = declare("MockMarket").unwrap().contract_class();
     let mut calldata = array![];
 
@@ -85,7 +80,7 @@ pub fn deploy_flash_loan_handler() -> IFlashLoanHandlerDispatcher {
 }
 
 pub fn deploy_default_interest_rate_model(
-    slope_0: felt252, slope_1: felt252, y_intercept: felt252, optimal_rate: felt252
+    slope_0: felt252, slope_1: felt252, y_intercept: felt252, optimal_rate: felt252,
 ) -> IInterestRateModelDispatcher {
     let contract = declare("DefaultInterestRateModel").unwrap().contract_class();
     let calldata = array![slope_0, slope_1, y_intercept, optimal_rate];
@@ -100,7 +95,7 @@ pub fn deploy_z_token(
     underlying: ContractAddress,
     name: felt252,
     symbol: felt252,
-    decimals: felt252
+    decimals: felt252,
 ) -> IZTokenDispatcher {
     let contract = declare("ZToken").unwrap().contract_class();
     let calldata = array![owner.into(), market.into(), underlying.into(), name, symbol, decimals];

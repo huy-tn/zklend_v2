@@ -8,9 +8,9 @@ use snforge_std::{spy_events, EventSpyAssertionsTrait};
 use zklend_v2::interfaces::{IZTokenDispatcher, IZTokenDispatcherTrait};
 use zklend_v2::z_token::ZToken;
 
-use super::{deploy, event_keys};
+use super::deploy;
 use super::mock::{
-    IAccountDispatcher, IAccountDispatcherTrait, IMockMarketDispatcher, IMockMarketDispatcherTrait
+    IAccountDispatcher, IAccountDispatcherTrait, IMockMarketDispatcher, IMockMarketDispatcherTrait,
 };
 
 fn MOCK_TOKEN_ADDRESS() -> ContractAddress {
@@ -42,7 +42,7 @@ fn setup() -> Setup {
     market
         .set_lending_accumulator(
             MOCK_TOKEN_ADDRESS(), // token
-             1000000000000000000000000000 // value
+            1000000000000000000000000000 // value
         );
     market
         .mint_z_token(
@@ -53,7 +53,7 @@ fn setup() -> Setup {
     market
         .set_lending_accumulator(
             MOCK_TOKEN_ADDRESS(), // token
-             2000000000000000000000000000 // value
+            2000000000000000000000000000 // value
         );
 
     Setup { alice, bob, market, z_token }
@@ -75,7 +75,7 @@ fn test_balance_should_scale_with_accumulator() {
     let setup = setup();
 
     assert_eq!(
-        @setup.z_token.balanceOf(setup.alice.contract_address), @200000000000000000000, "FAILED"
+        @setup.z_token.balanceOf(setup.alice.contract_address), @200000000000000000000, "FAILED",
     );
 }
 
@@ -93,33 +93,33 @@ fn test_transfer_should_emit_events() {
             50_000000000000000000 // amount
         );
 
-    spy.assert_emitted(
-        @array![
-            (
-                setup.z_token.contract_address,
-                ZToken::Event::Transfer(
-                    ZToken::Transfer {
-                        from: setup.alice.contract_address,
-                        to: setup.bob.contract_address,
-                        value: 50_000000000000000000
-                    }
-                )
-            ),
-            
-            (
-                setup.z_token.contract_address,
-                ZToken::Event::RawTransfer(
-                    ZToken::RawTransfer {
-                        from: setup.alice.contract_address,
-                        to: setup.bob.contract_address,
-                        raw_value: 25_000000000000000000,
-                        accumulator: 2_000000000000000000000000000,
-                        face_value: 50_000000000000000000
-                    }
-                )
-            )
-        ]
-    );
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    setup.z_token.contract_address,
+                    ZToken::Event::Transfer(
+                        ZToken::Transfer {
+                            from: setup.alice.contract_address,
+                            to: setup.bob.contract_address,
+                            value: 50_000000000000000000,
+                        },
+                    ),
+                ),
+                (
+                    setup.z_token.contract_address,
+                    ZToken::Event::RawTransfer(
+                        ZToken::RawTransfer {
+                            from: setup.alice.contract_address,
+                            to: setup.bob.contract_address,
+                            raw_value: 25_000000000000000000,
+                            accumulator: 2_000000000000000000000000000,
+                            face_value: 50_000000000000000000,
+                        },
+                    ),
+                ),
+            ],
+        );
 }
 
 #[test]
@@ -135,32 +135,33 @@ fn test_transfer_all_should_emit_events() {
             setup.bob.contract_address // recipient
         );
 
-    spy.assert_emitted(
-        @array![
-            (
-                setup.z_token.contract_address,
-                ZToken::Event::Transfer(
-                    ZToken::Transfer {
-                        from: setup.alice.contract_address,
-                        to: setup.bob.contract_address,
-                        value: 200_000000000000000000
-                    }
-                )
-            ),
-            (
-                setup.z_token.contract_address,
-                ZToken::Event::RawTransfer(
-                    ZToken::RawTransfer {
-                        from: setup.alice.contract_address,
-                        to: setup.bob.contract_address,
-                        raw_value: 100_000000000000000000,
-                        accumulator: 2_000000000000000000000000000,
-                        face_value: 200_000000000000000000
-                    }
-                )
-            )
-        ]
-    );
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    setup.z_token.contract_address,
+                    ZToken::Event::Transfer(
+                        ZToken::Transfer {
+                            from: setup.alice.contract_address,
+                            to: setup.bob.contract_address,
+                            value: 200_000000000000000000,
+                        },
+                    ),
+                ),
+                (
+                    setup.z_token.contract_address,
+                    ZToken::Event::RawTransfer(
+                        ZToken::RawTransfer {
+                            from: setup.alice.contract_address,
+                            to: setup.bob.contract_address,
+                            raw_value: 100_000000000000000000,
+                            accumulator: 2_000000000000000000000000000,
+                            face_value: 200_000000000000000000,
+                        },
+                    ),
+                ),
+            ],
+        );
 }
 
 #[test]
@@ -171,7 +172,7 @@ fn test_approve_should_change_allowance() {
     assert_eq!(
         @setup.z_token.allowance(setup.alice.contract_address, setup.bob.contract_address),
         @0,
-        "FAILED"
+        "FAILED",
     );
 
     setup
@@ -185,13 +186,13 @@ fn test_approve_should_change_allowance() {
         .market
         .set_lending_accumulator(
             MOCK_TOKEN_ADDRESS(), // token
-             3000000000000000000000000000 // value
+            3000000000000000000000000000 // value
         );
 
     assert_eq!(
         @setup.z_token.allowance(setup.alice.contract_address, setup.bob.contract_address),
         @50000000000000000000,
-        "FAILED"
+        "FAILED",
     );
 }
 
@@ -213,7 +214,7 @@ fn test_transfer_from() {
         .market
         .set_lending_accumulator(
             MOCK_TOKEN_ADDRESS(), // token
-             4000000000000000000000000000 // value
+            4000000000000000000000000000 // value
         );
 
     // Bob transfers 40 from Alice
@@ -233,19 +234,19 @@ fn test_transfer_from() {
         .market
         .set_lending_accumulator(
             MOCK_TOKEN_ADDRESS(), // token
-             8000000000000000000000000000 // value
+            8000000000000000000000000000 // value
         );
 
     assert_eq!(
         @setup.z_token.allowance(setup.alice.contract_address, setup.bob.contract_address),
         @10000000000000000000,
-        "FAILED"
+        "FAILED",
     );
     assert_eq!(
-        @setup.z_token.balanceOf(setup.alice.contract_address), @720000000000000000000, "FAILED"
+        @setup.z_token.balanceOf(setup.alice.contract_address), @720000000000000000000, "FAILED",
     );
     assert_eq!(
-        @setup.z_token.balanceOf(setup.bob.contract_address), @80000000000000000000, "FAILED"
+        @setup.z_token.balanceOf(setup.bob.contract_address), @80000000000000000000, "FAILED",
     );
 }
 
@@ -264,12 +265,12 @@ fn test_transfer_all() {
         .market
         .set_lending_accumulator(
             MOCK_TOKEN_ADDRESS(), // token
-             4000000000000000000000000000 // value
+            4000000000000000000000000000 // value
         );
 
     assert_eq!(@setup.z_token.balanceOf(setup.alice.contract_address), @0, "FAILED");
     assert_eq!(
-        @setup.z_token.balanceOf(setup.bob.contract_address), @400000000000000000000, "FAILED"
+        @setup.z_token.balanceOf(setup.bob.contract_address), @400000000000000000000, "FAILED",
     );
 }
 
@@ -289,19 +290,19 @@ fn test_burn_all() {
         .market
         .set_lending_accumulator(
             MOCK_TOKEN_ADDRESS(), // token
-             4000000000000000000000000000 // value
+            4000000000000000000000000000 // value
         );
     setup
         .market
         .burn_all_z_token(
             setup.z_token.contract_address, // z_token
-             setup.alice.contract_address // user
+            setup.alice.contract_address // user
         );
 
     assert_eq!(@setup.market.get_last_call_result(), @400000000000000000000, "FAILED");
     assert_eq!(@setup.z_token.balanceOf(setup.alice.contract_address), @0, "FAILED");
     assert_eq!(
-        @setup.z_token.balanceOf(setup.bob.contract_address), @200000000000000000000, "FAILED"
+        @setup.z_token.balanceOf(setup.bob.contract_address), @200000000000000000000, "FAILED",
     );
     assert_eq!(@setup.z_token.totalSupply(), @200000000000000000000, "FAILED");
 }

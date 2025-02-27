@@ -4,7 +4,7 @@ pub mod Account {
 
     use zklend_v2::interfaces::{
         IMarketDispatcher, IMarketDispatcherTrait, ITestContractDispatcher,
-        ITestContractDispatcherTrait, IZTokenDispatcher, IZTokenDispatcherTrait
+        ITestContractDispatcherTrait, IZTokenDispatcher, IZTokenDispatcherTrait,
     };
 
     use super::super::{IAccount, IERC20Dispatcher, IERC20DispatcherTrait};
@@ -18,7 +18,7 @@ pub mod Account {
             self: @ContractState,
             contract_address: ContractAddress,
             recipient: ContractAddress,
-            amount: u256
+            amount: u256,
         ) {
             IERC20Dispatcher { contract_address }.transfer(recipient, amount);
         }
@@ -27,7 +27,7 @@ pub mod Account {
             self: @ContractState,
             contract_address: ContractAddress,
             spender: ContractAddress,
-            amount: u256
+            amount: u256,
         ) {
             IERC20Dispatcher { contract_address }.approve(spender, amount);
         }
@@ -37,13 +37,13 @@ pub mod Account {
             contract_address: ContractAddress,
             sender: ContractAddress,
             recipient: ContractAddress,
-            amount: u256
+            amount: u256,
         ) {
             IERC20Dispatcher { contract_address }.transferFrom(sender, recipient, amount);
         }
 
         fn z_token_transfer_all(
-            ref self: ContractState, contract_address: ContractAddress, recipient: ContractAddress
+            ref self: ContractState, contract_address: ContractAddress, recipient: ContractAddress,
         ) -> felt252 {
             IZTokenDispatcher { contract_address }.transfer_all(recipient)
         }
@@ -51,7 +51,7 @@ pub mod Account {
         fn market_set_treasury(
             ref self: ContractState,
             contract_address: ContractAddress,
-            new_treasury: ContractAddress
+            new_treasury: ContractAddress,
         ) {
             IMarketDispatcher { contract_address }.set_treasury(new_treasury)
         }
@@ -60,7 +60,7 @@ pub mod Account {
             ref self: ContractState,
             contract_address: ContractAddress,
             token: ContractAddress,
-            interest_rate_model: ContractAddress
+            interest_rate_model: ContractAddress,
         ) {
             IMarketDispatcher { contract_address }
                 .set_interest_rate_model(token, interest_rate_model)
@@ -70,7 +70,7 @@ pub mod Account {
             ref self: ContractState,
             contract_address: ContractAddress,
             token: ContractAddress,
-            collateral_factor: felt252
+            collateral_factor: felt252,
         ) {
             IMarketDispatcher { contract_address }.set_collateral_factor(token, collateral_factor)
         }
@@ -79,7 +79,7 @@ pub mod Account {
             ref self: ContractState,
             contract_address: ContractAddress,
             token: ContractAddress,
-            borrow_factor: felt252
+            borrow_factor: felt252,
         ) {
             IMarketDispatcher { contract_address }.set_borrow_factor(token, borrow_factor)
         }
@@ -88,7 +88,7 @@ pub mod Account {
             ref self: ContractState,
             contract_address: ContractAddress,
             token: ContractAddress,
-            reserve_factor: felt252
+            reserve_factor: felt252,
         ) {
             IMarketDispatcher { contract_address }.set_reserve_factor(token, reserve_factor)
         }
@@ -97,7 +97,7 @@ pub mod Account {
             ref self: ContractState,
             contract_address: ContractAddress,
             token: ContractAddress,
-            limit: felt252
+            limit: felt252,
         ) {
             IMarketDispatcher { contract_address }.set_debt_limit(token, limit)
         }
@@ -106,7 +106,7 @@ pub mod Account {
             ref self: ContractState,
             contract_address: ContractAddress,
             token: ContractAddress,
-            limit: felt252
+            limit: felt252,
         ) {
             IMarketDispatcher { contract_address }.set_deposit_limit(token, limit)
         }
@@ -121,7 +121,7 @@ pub mod Account {
             borrow_factor: felt252,
             reserve_factor: felt252,
             flash_loan_fee: felt252,
-            liquidation_bonus: felt252
+            liquidation_bonus: felt252,
         ) {
             IMarketDispatcher { contract_address }
                 .add_reserve(
@@ -132,7 +132,7 @@ pub mod Account {
                     borrow_factor,
                     reserve_factor,
                     flash_loan_fee,
-                    liquidation_bonus
+                    liquidation_bonus,
                 )
         }
 
@@ -140,7 +140,7 @@ pub mod Account {
             ref self: ContractState,
             contract_address: ContractAddress,
             token: ContractAddress,
-            amount: felt252
+            amount: felt252,
         ) {
             IMarketDispatcher { contract_address }.deposit(token, amount)
         }
@@ -149,13 +149,13 @@ pub mod Account {
             ref self: ContractState,
             contract_address: ContractAddress,
             token: ContractAddress,
-            amount: felt252
+            amount: felt252,
         ) {
             IMarketDispatcher { contract_address }.withdraw(token, amount)
         }
 
         fn market_withdraw_all(
-            ref self: ContractState, contract_address: ContractAddress, token: ContractAddress
+            ref self: ContractState, contract_address: ContractAddress, token: ContractAddress,
         ) {
             IMarketDispatcher { contract_address }.withdraw_all(token)
         }
@@ -164,25 +164,25 @@ pub mod Account {
             ref self: ContractState,
             contract_address: ContractAddress,
             token: ContractAddress,
-            amount: felt252
+            amount: felt252,
         ) {
             IMarketDispatcher { contract_address }.repay(token, amount)
         }
 
         fn market_repay_all(
-            ref self: ContractState, contract_address: ContractAddress, token: ContractAddress
+            ref self: ContractState, contract_address: ContractAddress, token: ContractAddress,
         ) {
             IMarketDispatcher { contract_address }.repay_all(token)
         }
 
         fn market_enable_collateral(
-            ref self: ContractState, contract_address: ContractAddress, token: ContractAddress
+            ref self: ContractState, contract_address: ContractAddress, token: ContractAddress,
         ) {
             IMarketDispatcher { contract_address }.enable_collateral(token)
         }
 
         fn market_disable_collateral(
-            ref self: ContractState, contract_address: ContractAddress, token: ContractAddress
+            ref self: ContractState, contract_address: ContractAddress, token: ContractAddress,
         ) {
             IMarketDispatcher { contract_address }.disable_collateral(token)
         }
@@ -191,7 +191,7 @@ pub mod Account {
             ref self: ContractState,
             contract_address: ContractAddress,
             token: ContractAddress,
-            amount: felt252
+            amount: felt252,
         ) {
             IMarketDispatcher { contract_address }.borrow(token, amount)
         }
@@ -202,7 +202,7 @@ pub mod Account {
             user: ContractAddress,
             debt_token: ContractAddress,
             amount: felt252,
-            collateral_token: ContractAddress
+            collateral_token: ContractAddress,
         ) {
             IMarketDispatcher { contract_address }
                 .liquidate(user, debt_token, amount, collateral_token)

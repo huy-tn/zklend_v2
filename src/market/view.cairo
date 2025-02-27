@@ -1,13 +1,9 @@
 // use traits::Into;
 // use zeroable::Zeroable;
 
-use core::num::traits::{Bounded, Zero};
-
+use core::num::traits::Zero;
 
 use starknet::{ContractAddress, get_block_timestamp};
-
-// Hack to simulate the `crate` keyword
-use super::super as crate;
 
 use crate::interfaces::{IZTokenDispatcher, IZTokenDispatcherTrait, MarketReserveData};
 use crate::libraries::{safe_decimal_math, safe_math};
@@ -20,14 +16,7 @@ use super::Market as contract;
 use contract::ContractState;
 
 use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
-
-// These are hacks that depend on compiler implementation details :(
-// But they're needed for refactoring the contract code into modules like this one.
-// use contract::raw_user_debtsContractMemberStateTrait;
-// use contract::reservesContractMemberStateTrait;
-// use contract::treasuryContractMemberStateTrait;
-// use contract::user_flagsContractMemberStateTrait;
+use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess};
 
 const SECONDS_PER_YEAR: felt252 = 31536000;
 

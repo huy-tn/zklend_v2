@@ -2,18 +2,11 @@ use starknet::ContractAddress;
 use starknet::event::EventEmitter;
 use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
 
-// Hack to simulate the `crate` keyword
-use super::super as crate;
-
 use crate::libraries::ownable;
 
 use super::ZToken as contract;
 
 use contract::ContractState;
-
-// These are hacks that depend on compiler implementation details :(
-// But they're needed for refactoring the contract code into modules like this one.
-// use contract::Ownable_ownerContractMemberStateTrait;
 
 pub impl ZTokenOwnable of ownable::Ownable<ContractState> {
     fn read_owner(self: @ContractState) -> ContractAddress {

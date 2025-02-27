@@ -1,9 +1,6 @@
 use starknet::ContractAddress;
 use starknet::event::EventEmitter;
 
-// Hack to simulate the `crate` keyword
-use super::super as crate;
-
 use crate::libraries::{ownable, reentrancy_guard};
 
 use super::Market as contract;

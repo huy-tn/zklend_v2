@@ -1,20 +1,10 @@
-// use option::OptionTrait;
-// use traits::{Into, TryInto};
-// use zeroable::Zeroable;
-use core::num::traits::{Bounded, Zero};
+use core::num::traits::Zero;
 
 use starknet::event::EventEmitter;
-use starknet::{
-    ClassHash, ContractAddress, SyscallResultTrait, contract_address_const, get_caller_address,
-    // replace_class_syscall,
-};
+use starknet::{ContractAddress, contract_address_const, get_caller_address};
 
 use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
-
-
-// Hack to simulate the `crate` keyword
-use super::super as crate;
+use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess};
 
 use crate::libraries::{ownable, safe_decimal_math, safe_math};
 
@@ -24,17 +14,6 @@ use super::{errors, internal};
 use super::ZToken as contract;
 
 use contract::ContractState;
-
-// These are hacks that depend on compiler implementation details :(
-// But they're needed for refactoring the contract code into modules like this one.
-// use contract::allowancesContractMemberStateTrait;
-// use contract::marketContractMemberStateTrait;
-// use contract::raw_balancesContractMemberStateTrait;
-// use contract::raw_total_supplyContractMemberStateTrait;
-// use contract::token_decimalsContractMemberStateTrait;
-// use contract::token_nameContractMemberStateTrait;
-// use contract::token_symbolContractMemberStateTrait;
-// use contract::underlyingContractMemberStateTrait;
 
 pub fn initializer(
     ref self: ContractState,

@@ -5,11 +5,6 @@ pub mod errors {
 // TODO: manually create copies of this contract with hard-coded values instead of using storage
 #[starknet::contract]
 pub mod DefaultInterestRateModel {
-    // use traits::Into;
-
-    // Hack to simulate the `crate` keyword
-    use super::super::super as crate;
-
     use crate::interfaces::{IInterestRateModel, ModelRates};
     use crate::libraries::{safe_decimal_math, safe_math};
 
@@ -20,7 +15,7 @@ pub mod DefaultInterestRateModel {
 
     #[storage]
     struct Storage {
-        curve_params: CurveParams
+        curve_params: CurveParams,
     }
 
     #[derive(Drop, starknet::Store)]
@@ -28,7 +23,7 @@ pub mod DefaultInterestRateModel {
         slope_0: felt252,
         slope_1: felt252,
         y_intercept: felt252,
-        optimal_rate: felt252
+        optimal_rate: felt252,
     }
 
     #[constructor]
@@ -37,11 +32,11 @@ pub mod DefaultInterestRateModel {
         slope_0: felt252,
         slope_1: felt252,
         y_intercept: felt252,
-        optimal_rate: felt252
+        optimal_rate: felt252,
     ) {
         assert(
             Into::<_, u256>::into(optimal_rate) <= Into::<_, u256>::into(safe_decimal_math::SCALE),
-            errors::INVALID_OPTIMAL_RATE
+            errors::INVALID_OPTIMAL_RATE,
         );
 
         self.curve_params.write(CurveParams { slope_0, slope_1, y_intercept, optimal_rate });
@@ -50,7 +45,7 @@ pub mod DefaultInterestRateModel {
     #[abi(embed_v0)]
     impl IInterestRateModelImpl of IInterestRateModel<ContractState> {
         fn get_interest_rates(
-            self: @ContractState, reserve_balance: felt252, total_debt: felt252
+            self: @ContractState, reserve_balance: felt252, total_debt: felt252,
         ) -> ModelRates {
             let utilization_rate = calculate_utilization_rate(reserve_balance, total_debt);
             if utilization_rate == 0 {
@@ -77,9 +72,9 @@ pub mod DefaultInterestRateModel {
         let params = self.curve_params.read();
 
         let below_optimal_rate = Into::<
-            _, u256
+            _, u256,
             >::into(utilization_rate) <= Into::<
-            _, u256
+            _, u256,
         >::into(params.optimal_rate);
 
         if below_optimal_rate {

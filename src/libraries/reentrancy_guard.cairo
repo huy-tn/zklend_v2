@@ -8,10 +8,6 @@
 // 2. It's implemented as a contract instead of a library, so there seems to be no way to integrate
 //    into our contract;
 
-use core::num::traits::{Bounded, Zero};
-
-use starknet::{ContractAddress, contract_address_const, get_caller_address};
-
 mod errors {
     pub const REENTRANT_CALL: felt252 = 'RG_REENTRANT_CALL';
 }

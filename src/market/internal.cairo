@@ -10,23 +10,14 @@
 // loops!). These can be fixed later by refactoring and optimizing the code, though it's quite
 // unlike to happen. After all, if it ain't broken, don't fix it :)
 
-// use option::OptionTrait;
-// use traits::{Into, TryInto};
-// use zeroable::Zeroable;
-
-use core::num::traits::{Bounded, Zero};
+use core::num::traits::Zero;
+use core::traits::{BitAnd, BitNot, BitOr};
 
 use starknet::event::EventEmitter;
 use starknet::{ContractAddress, get_block_timestamp, get_caller_address, get_contract_address};
 
 use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
-
-use core::traits::{BitAnd, BitNot, BitOr};
-
-
-// Hack to simulate the `crate` keyword
-use super::super as crate;
+use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess};
 
 use crate::interfaces::{
     IERC20Dispatcher, IERC20DispatcherTrait, IInterestRateModelDispatcher,
@@ -37,9 +28,6 @@ use crate::interfaces::{
 use crate::libraries::{math, safe_decimal_math, safe_math};
 
 use super::{errors, view};
-
-// use super::storage::{StorageBatch1};
-
 use super::Market as contract;
 use super::UpdatedAccumulators;
 

@@ -33,7 +33,7 @@ pub trait IERC20<TContractState> {
     fn transfer(ref self: TContractState, recipient: ContractAddress, amount: u256) -> bool;
 
     fn transferFrom(
-        ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+        ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256,
     ) -> bool;
 
     fn approve(ref self: TContractState, spender: ContractAddress, amount: u256) -> bool;
@@ -45,14 +45,14 @@ pub trait IAccount<TContractState> {
         self: @TContractState,
         contract_address: ContractAddress,
         recipient: ContractAddress,
-        amount: u256
+        amount: u256,
     );
 
     fn erc20_approve(
         self: @TContractState,
         contract_address: ContractAddress,
         spender: ContractAddress,
-        amount: u256
+        amount: u256,
     );
 
     fn erc20_transfer_from(
@@ -60,57 +60,57 @@ pub trait IAccount<TContractState> {
         contract_address: ContractAddress,
         sender: ContractAddress,
         recipient: ContractAddress,
-        amount: u256
+        amount: u256,
     );
 
     fn z_token_transfer_all(
-        ref self: TContractState, contract_address: ContractAddress, recipient: ContractAddress
+        ref self: TContractState, contract_address: ContractAddress, recipient: ContractAddress,
     ) -> felt252;
 
     fn market_set_treasury(
-        ref self: TContractState, contract_address: ContractAddress, new_treasury: ContractAddress
+        ref self: TContractState, contract_address: ContractAddress, new_treasury: ContractAddress,
     );
 
     fn market_set_interest_rate_model(
         ref self: TContractState,
         contract_address: ContractAddress,
         token: ContractAddress,
-        interest_rate_model: ContractAddress
+        interest_rate_model: ContractAddress,
     );
 
     fn market_set_collateral_factor(
         ref self: TContractState,
         contract_address: ContractAddress,
         token: ContractAddress,
-        collateral_factor: felt252
+        collateral_factor: felt252,
     );
 
     fn market_set_borrow_factor(
         ref self: TContractState,
         contract_address: ContractAddress,
         token: ContractAddress,
-        borrow_factor: felt252
+        borrow_factor: felt252,
     );
 
     fn market_set_reserve_factor(
         ref self: TContractState,
         contract_address: ContractAddress,
         token: ContractAddress,
-        reserve_factor: felt252
+        reserve_factor: felt252,
     );
 
     fn market_set_debt_limit(
         ref self: TContractState,
         contract_address: ContractAddress,
         token: ContractAddress,
-        limit: felt252
+        limit: felt252,
     );
 
     fn market_set_deposit_limit(
         ref self: TContractState,
         contract_address: ContractAddress,
         token: ContractAddress,
-        limit: felt252
+        limit: felt252,
     );
 
     fn market_add_reserve(
@@ -123,51 +123,51 @@ pub trait IAccount<TContractState> {
         borrow_factor: felt252,
         reserve_factor: felt252,
         flash_loan_fee: felt252,
-        liquidation_bonus: felt252
+        liquidation_bonus: felt252,
     );
 
     fn market_deposit(
         ref self: TContractState,
         contract_address: ContractAddress,
         token: ContractAddress,
-        amount: felt252
+        amount: felt252,
     );
 
     fn market_withdraw(
         ref self: TContractState,
         contract_address: ContractAddress,
         token: ContractAddress,
-        amount: felt252
+        amount: felt252,
     );
 
     fn market_withdraw_all(
-        ref self: TContractState, contract_address: ContractAddress, token: ContractAddress
+        ref self: TContractState, contract_address: ContractAddress, token: ContractAddress,
     );
 
     fn market_repay(
         ref self: TContractState,
         contract_address: ContractAddress,
         token: ContractAddress,
-        amount: felt252
+        amount: felt252,
     );
 
     fn market_repay_all(
-        ref self: TContractState, contract_address: ContractAddress, token: ContractAddress
+        ref self: TContractState, contract_address: ContractAddress, token: ContractAddress,
     );
 
     fn market_enable_collateral(
-        ref self: TContractState, contract_address: ContractAddress, token: ContractAddress
+        ref self: TContractState, contract_address: ContractAddress, token: ContractAddress,
     );
 
     fn market_disable_collateral(
-        ref self: TContractState, contract_address: ContractAddress, token: ContractAddress
+        ref self: TContractState, contract_address: ContractAddress, token: ContractAddress,
     );
 
     fn market_borrow(
         ref self: TContractState,
         contract_address: ContractAddress,
         token: ContractAddress,
-        amount: felt252
+        amount: felt252,
     );
 
     fn market_liquidate(
@@ -176,7 +176,7 @@ pub trait IAccount<TContractState> {
         user: ContractAddress,
         debt_token: ContractAddress,
         amount: felt252,
-        collateral_token: ContractAddress
+        collateral_token: ContractAddress,
     );
 }
 
@@ -193,7 +193,7 @@ pub trait IMockMarket<TContractState> {
     fn is_user_undercollateralized(self: @TContractState, user: ContractAddress) -> bool;
 
     fn is_collateral_enabled(
-        self: @TContractState, user: ContractAddress, token: ContractAddress
+        self: @TContractState, user: ContractAddress, token: ContractAddress,
     ) -> bool;
 
     fn get_last_call_result(self: @TContractState) -> felt252;
@@ -209,7 +209,7 @@ pub trait IMockMarket<TContractState> {
     fn set_user_undercollateralized(ref self: TContractState, user: ContractAddress, value: bool);
 
     fn mint_z_token(
-        ref self: TContractState, z_token: ContractAddress, to: ContractAddress, amount: felt252
+        ref self: TContractState, z_token: ContractAddress, to: ContractAddress, amount: felt252,
     );
 
     fn burn_all_z_token(ref self: TContractState, z_token: ContractAddress, user: ContractAddress);
@@ -233,7 +233,7 @@ pub trait IMockPriceOracle<TContractState> {
     //
 
     fn set_price(
-        ref self: TContractState, token: ContractAddress, price: felt252, update_time: felt252
+        ref self: TContractState, token: ContractAddress, price: felt252, update_time: felt252,
     );
 }
 
@@ -249,7 +249,7 @@ pub trait IMockChainlinkOracle<TContractState> {
         answer: u128,
         block_num: u64,
         started_at: u64,
-        updated_at: u64
+        updated_at: u64,
     );
 }
 
@@ -265,7 +265,7 @@ pub trait IMockPragmaOracle<TContractState> {
         price: u128,
         decimals: u32,
         last_updated_timestamp: u64,
-        num_sources_aggregated: u32
+        num_sources_aggregated: u32,
     );
 }
 
@@ -280,6 +280,6 @@ pub trait IFlashLoanHandler<TContractState> {
         market_addr: ContractAddress,
         token: ContractAddress,
         amount: felt252,
-        return_amount: felt252
+        return_amount: felt252,
     );
 }

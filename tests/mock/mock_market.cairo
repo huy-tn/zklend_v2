@@ -17,7 +17,7 @@ pub mod MockMarket {
         debt_accumulator: Map::<ContractAddress, felt252>,
         collateral_enabled: Map::<(ContractAddress, ContractAddress), bool>,
         user_undercollateralized: Map::<ContractAddress, bool>,
-        last_call_result: felt252
+        last_call_result: felt252,
     }
 
     #[abi(embed_v0)]
@@ -35,7 +35,7 @@ pub mod MockMarket {
         }
 
         fn is_collateral_enabled(
-            self: @ContractState, user: ContractAddress, token: ContractAddress
+            self: @ContractState, user: ContractAddress, token: ContractAddress,
         ) -> bool {
             self.collateral_enabled.read((user, token))
         }
@@ -45,7 +45,7 @@ pub mod MockMarket {
         }
 
         fn set_lending_accumulator(
-            ref self: ContractState, token: ContractAddress, value: felt252
+            ref self: ContractState, token: ContractAddress, value: felt252,
         ) {
             self.lending_accumulator.write(token, value);
         }
@@ -55,19 +55,19 @@ pub mod MockMarket {
         }
 
         fn set_user_undercollateralized(
-            ref self: ContractState, user: ContractAddress, value: bool
+            ref self: ContractState, user: ContractAddress, value: bool,
         ) {
             self.user_undercollateralized.write(user, value);
         }
 
         fn mint_z_token(
-            ref self: ContractState, z_token: ContractAddress, to: ContractAddress, amount: felt252
+            ref self: ContractState, z_token: ContractAddress, to: ContractAddress, amount: felt252,
         ) {
             IZTokenDispatcher { contract_address: z_token }.mint(to, amount);
         }
 
         fn burn_all_z_token(
-            ref self: ContractState, z_token: ContractAddress, user: ContractAddress
+            ref self: ContractState, z_token: ContractAddress, user: ContractAddress,
         ) {
             let amount_burnt = IZTokenDispatcher { contract_address: z_token }.burn_all(user);
             self.last_call_result.write(amount_burnt);

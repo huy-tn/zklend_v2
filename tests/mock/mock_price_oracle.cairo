@@ -12,13 +12,13 @@ pub mod MockPriceOracle {
 
     #[storage]
     struct Storage {
-        prices: Map::<ContractAddress, PriceData>
+        prices: Map::<ContractAddress, PriceData>,
     }
 
     #[derive(Drop, starknet::Store)]
     struct PriceData {
         price: felt252,
-        update_time: felt252
+        update_time: felt252,
     }
 
     #[abi(embed_v0)]
@@ -30,7 +30,7 @@ pub mod MockPriceOracle {
         }
 
         fn get_price_with_time(
-            self: @ContractState, token: ContractAddress
+            self: @ContractState, token: ContractAddress,
         ) -> PriceWithUpdateTime {
             let data = self.prices.read(token);
             assert(!data.price.is_zero(), 'MOCK_ORACLE_PRICE_NOT_SET');
@@ -41,7 +41,7 @@ pub mod MockPriceOracle {
     #[abi(embed_v0)]
     impl IMockPriceOracleImpl of IMockPriceOracle<ContractState> {
         fn set_price(
-            ref self: ContractState, token: ContractAddress, price: felt252, update_time: felt252
+            ref self: ContractState, token: ContractAddress, price: felt252, update_time: felt252,
         ) {
             self.prices.write(token, PriceData { price, update_time });
         }

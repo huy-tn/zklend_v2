@@ -1,7 +1,3 @@
-// use option::OptionTrait;
-// use test::test_utils::assert_eq!;
-// use traits::{Into, TryInto};
-
 use core::traits::BitAnd;
 
 use starknet::contract_address_const;
@@ -11,15 +7,15 @@ use snforge_std::{spy_events, EventSpyAssertionsTrait, start_cheat_block_timesta
 
 use zklend_v2::interfaces::{
     IInterestRateModelDispatcher, IMarketDispatcher, IMarketDispatcherTrait, IZTokenDispatcher,
-    IZTokenDispatcherTrait
+    IZTokenDispatcherTrait,
 };
 use zklend_v2::market::Market;
 
 use super::assertions::assert_approximatedly_equals;
-use super::{deploy, event_keys};
+use super::deploy;
 use super::mock::{
     IAccountDispatcher, IAccountDispatcherTrait, IERC20Dispatcher, IERC20DispatcherTrait,
-    IFlashLoanHandlerDispatcherTrait, IMockPriceOracleDispatcher, IMockPriceOracleDispatcherTrait
+    IFlashLoanHandlerDispatcherTrait, IMockPriceOracleDispatcher, IMockPriceOracleDispatcherTrait,
 };
 
 // TODO: add test cases for:
@@ -30,14 +26,6 @@ use super::mock::{
 fn MOCK_TREASURY_ADDRESS() -> ContractAddress {
     'MOCK_TREASURY_ADDRESS'.try_into().unwrap()
 }
-
-// fn ALICE() -> ContractAddress {
-//     'ALICE'.try_into().unwrap()
-// }
-
-// fn BOB() -> ContractAddress {
-//     'BOB'.try_into().unwrap()
-// }
 
 #[derive(Drop)]
 struct Setup {
@@ -50,7 +38,7 @@ struct Setup {
     irm_a: IInterestRateModelDispatcher,
     token_b: IERC20Dispatcher,
     z_token_b: IZTokenDispatcher,
-    irm_b: IInterestRateModelDispatcher
+    irm_b: IInterestRateModelDispatcher,
 }
 
 fn pre_setup() -> Setup {
@@ -102,7 +90,7 @@ fn pre_setup() -> Setup {
         200000000000000000000000000, // slope_0: 0.2
         300000000000000000000000000, // slope_1: 0.3
         50000000000000000000000000, // y_intercept: 5%
-        800000000000000000000000000, // optimal_rate: 80%
+        800000000000000000000000000 // optimal_rate: 80%
     );
 
     Setup { alice, bob, oracle, market, token_a, z_token_a, irm_a, token_b, z_token_b, irm_b }
@@ -113,11 +101,7 @@ fn setup() -> Setup {
 
     // TST_A: 50% collateral_factor, 80% borrow_factor
     // TST_B: 75% collateral_factor, 90% borrow_factor
-    setup
-        .alice
-        .market_set_treasury(
-            setup.market.contract_address, MOCK_TREASURY_ADDRESS()
-        );
+    setup.alice.market_set_treasury(setup.market.contract_address, MOCK_TREASURY_ADDRESS());
 
     setup
         .alice
@@ -130,7 +114,7 @@ fn setup() -> Setup {
             80_0000000000000000000000000, // borrow_factor
             10_0000000000000000000000000, // reserve_factor
             5_0000000000000000000000000, // flash_loan_fee
-            20_0000000000000000000000000, // liquidation_bonus
+            20_0000000000000000000000000 // liquidation_bonus
         );
     setup
         .alice
@@ -143,7 +127,7 @@ fn setup() -> Setup {
             90_0000000000000000000000000, // borrow_factor
             20_0000000000000000000000000, // reserve_factor
             1_0000000000000000000000000, // flash_loan_fee
-            10_0000000000000000000000000, // liquidation_bonus
+            10_0000000000000000000000000 // liquidation_bonus
         );
 
     setup
@@ -165,15 +149,15 @@ fn setup() -> Setup {
         .oracle
         .set_price(
             setup.token_a.contract_address, // token
-             50_00000000, // price
-             100 // update_time
+            50_00000000, // price
+            100 // update_time
         );
     setup
         .oracle
         .set_price(
             setup.token_b.contract_address, // token
-             100_00000000, // price
-             100 // update_time
+            100_00000000, // price
+            100 // update_time
         );
 
     setup
@@ -262,26 +246,27 @@ fn test_new_reserve_event() {
             200000000000000000000000000 // liquidation_bonus
         );
 
-    spy.assert_emitted(
-        @array![
-            (
-                setup.market.contract_address,
-                Market::Event::NewReserve(
-                    Market::NewReserve {
-                        token: setup.token_a.contract_address,
-                        z_token: setup.z_token_a.contract_address,
-                        decimals: 18,
-                        interest_rate_model: setup.irm_a.contract_address,
-                        collateral_factor: 500000000000000000000000000,
-                        borrow_factor: 800000000000000000000000000,
-                        reserve_factor: 100000000000000000000000000,
-                        flash_loan_fee: 50000000000000000000000000,
-                        liquidation_bonus: 200000000000000000000000000
-                    }
-                )
-            )
-        ]
-    );
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    setup.market.contract_address,
+                    Market::Event::NewReserve(
+                        Market::NewReserve {
+                            token: setup.token_a.contract_address,
+                            z_token: setup.z_token_a.contract_address,
+                            decimals: 18,
+                            interest_rate_model: setup.irm_a.contract_address,
+                            collateral_factor: 500000000000000000000000000,
+                            borrow_factor: 800000000000000000000000000,
+                            reserve_factor: 100000000000000000000000000,
+                            flash_loan_fee: 50000000000000000000000000,
+                            liquidation_bonus: 200000000000000000000000000,
+                        },
+                    ),
+                ),
+            ],
+        );
 }
 
 // Context: there was a bug in commit 98cc54b that incorrectly enables collateral usage when calling
@@ -298,7 +283,7 @@ fn test_disabling_already_disabled_collateral() {
     assert_eq!(
         @BitAnd::bitand(setup.market.get_user_flags(setup.alice.contract_address).into(), slot),
         @0,
-        "FAILED"
+        "FAILED",
     );
 
     setup
@@ -309,7 +294,7 @@ fn test_disabling_already_disabled_collateral() {
     assert_eq!(
         @BitAnd::bitand(setup.market.get_user_flags(setup.alice.contract_address).into(), slot),
         @0,
-        "FAILED"
+        "FAILED",
     );
 }
 
@@ -337,14 +322,14 @@ fn test_token_transferred_on_deposit() {
         .market_enable_collateral(setup.market.contract_address, setup.token_a.contract_address);
 
     assert_eq!(
-        @setup.token_a.balanceOf(setup.alice.contract_address), @999999000000000000000000, "FAILED"
+        @setup.token_a.balanceOf(setup.alice.contract_address), @999999000000000000000000, "FAILED",
     );
     assert_eq!(
-        @setup.token_a.balanceOf(setup.market.contract_address), @1000000000000000000, "FAILED"
+        @setup.token_a.balanceOf(setup.market.contract_address), @1000000000000000000, "FAILED",
     );
 
     assert_eq!(
-        @setup.z_token_a.balanceOf(setup.alice.contract_address), @1000000000000000000, "FAILED"
+        @setup.z_token_a.balanceOf(setup.alice.contract_address), @1000000000000000000, "FAILED",
     );
     assert_eq!(@setup.z_token_a.totalSupply(), @1000000000000000000, "FAILED");
 
@@ -355,20 +340,16 @@ fn test_token_transferred_on_deposit() {
     assert_eq!(
         @BitAnd::bitand(setup.market.get_user_flags(setup.alice.contract_address).into(), slot),
         @1,
-        "FAILED"
+        "FAILED",
     );
 }
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(
-    expected: (
-        'ERC20_INSUFFICIENT_ALLOWANCE',
-        // 'ENTRYPOINT_FAILED',
-        // 'ENTRYPOINT_FAILED',
-        // 'ENTRYPOINT_FAILED'
-    )
-)]
+#[should_panic(expected: ('ERC20_INSUFFICIENT_ALLOWANCE', // 'ENTRYPOINT_FAILED',
+// 'ENTRYPOINT_FAILED',
+// 'ENTRYPOINT_FAILED'
+))]
 fn test_deposit_transfer_failed() {
     let setup = setup();
 
@@ -385,7 +366,7 @@ fn test_deposit_transfer_failed() {
 #[test]
 #[available_gas(90000000)]
 // #[should_panic(expected: ('MKT_ZERO_AMOUNT', ))]
-#[should_panic(expected: ('MKT_ZERO_AMOUNT', ))]
+#[should_panic(expected: ('MKT_ZERO_AMOUNT',))]
 fn test_cannot_withdraw_with_zero_amount() {
     let setup = setup_with_alice_deposit();
 
@@ -393,7 +374,7 @@ fn test_cannot_withdraw_with_zero_amount() {
         .alice
         .market_withdraw(
             setup.market.contract_address, setup.token_a.contract_address, // token
-             0 // amount
+            0 // amount
         );
 }
 
@@ -404,10 +385,10 @@ fn test_token_burnt_on_withdrawal() {
 
     // Alice: 999,900 TST_A, 100 zTST_A
     assert_eq!(
-        @setup.token_a.balanceOf(setup.alice.contract_address), @999900000000000000000000, "FAILED"
+        @setup.token_a.balanceOf(setup.alice.contract_address), @999900000000000000000000, "FAILED",
     );
     assert_eq!(
-        @setup.z_token_a.balanceOf(setup.alice.contract_address), @100000000000000000000, "FAILED"
+        @setup.z_token_a.balanceOf(setup.alice.contract_address), @100000000000000000000, "FAILED",
     );
 
     setup
@@ -420,17 +401,19 @@ fn test_token_burnt_on_withdrawal() {
 
     // Alice: 999,925 TST_A, 75 zTST_A
     assert_eq!(
-        @setup.token_a.balanceOf(setup.alice.contract_address), @999925000000000000000000, "FAILED"
+        @setup.token_a.balanceOf(setup.alice.contract_address), @999925000000000000000000, "FAILED",
     );
     assert_eq!(
-        @setup.z_token_a.balanceOf(setup.alice.contract_address), @75000000000000000000, "FAILED"
+        @setup.z_token_a.balanceOf(setup.alice.contract_address), @75000000000000000000, "FAILED",
     );
 
     setup.alice.market_withdraw_all(setup.market.contract_address, setup.token_a.contract_address);
 
     // Alice: 1,000,000 TST_A, 0 zTST_A
     assert_eq!(
-        @setup.token_a.balanceOf(setup.alice.contract_address), @1000000000000000000000000, "FAILED"
+        @setup.token_a.balanceOf(setup.alice.contract_address),
+        @1000000000000000000000000,
+        "FAILED",
     );
     assert_eq!(@setup.z_token_a.balanceOf(setup.alice.contract_address), @0, "FAILED");
 }
@@ -457,7 +440,7 @@ fn test_has_debt_flag_changed_on_borrow() {
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(expected: ('MKT_INSUFFICIENT_COLLATERAL', ))]
+#[should_panic(expected: ('MKT_INSUFFICIENT_COLLATERAL',))]
 fn test_cannot_borrow_more_than_capacity() {
     let setup = setup_with_alice_and_bob_deposit();
 
@@ -479,7 +462,7 @@ fn test_token_received_on_borrow() {
     let setup = setup_with_loan();
 
     assert_eq!(
-        @setup.token_b.balanceOf(setup.alice.contract_address), @22500000000000000000, "FAILED"
+        @setup.token_b.balanceOf(setup.alice.contract_address), @22500000000000000000, "FAILED",
     );
 }
 
@@ -500,7 +483,7 @@ fn test_rates_changed_on_borrow() {
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(expected: ('MKT_INSUFFICIENT_COLLATERAL', ))]
+#[should_panic(expected: ('MKT_INSUFFICIENT_COLLATERAL',))]
 fn test_collateral_used_by_existing_loan() {
     let setup = setup_with_loan();
 
@@ -516,7 +499,7 @@ fn test_collateral_used_by_existing_loan() {
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(expected: ('MKT_INSUFFICIENT_COLLATERAL', ))]
+#[should_panic(expected: ('MKT_INSUFFICIENT_COLLATERAL',))]
 fn test_cannot_withdraw_collateral_used_by_loan() {
     let setup = setup_with_loan();
 
@@ -531,9 +514,7 @@ fn test_cannot_withdraw_collateral_used_by_loan() {
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(
-    expected: ('ZT_INVALID_COLLATERALIZATION', )
-)]
+#[should_panic(expected: ('ZT_INVALID_COLLATERALIZATION',))]
 fn test_cannot_transfer_collateral_used_by_loan() {
     let setup = setup_with_loan();
 
@@ -575,7 +556,7 @@ fn test_can_borrow_again_with_more_collateral() {
         );
 
     assert_eq!(
-        @setup.token_b.balanceOf(setup.alice.contract_address), @45000000000000000000, "FAILED"
+        @setup.token_b.balanceOf(setup.alice.contract_address), @45000000000000000000, "FAILED",
     );
 
     // Borrowing rate:
@@ -590,7 +571,7 @@ fn test_can_borrow_again_with_more_collateral() {
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(expected: ('MKT_DEBT_LIMIT_EXCEEDED', ))]
+#[should_panic(expected: ('MKT_DEBT_LIMIT_EXCEEDED',))]
 fn test_borrow_cannot_exceed_debt_limit() {
     let setup = setup_with_alice_and_bob_deposit();
 
@@ -639,7 +620,7 @@ fn test_can_borrow_till_debt_limit() {
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(expected: ('MKT_DEBT_LIMIT_EXCEEDED', ))]
+#[should_panic(expected: ('MKT_DEBT_LIMIT_EXCEEDED',))]
 fn test_debt_limit_is_global() {
     let setup = setup_with_alice_and_bob_deposit();
 
@@ -673,7 +654,7 @@ fn test_debt_limit_is_global() {
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(expected: ('MKT_DEPOSIT_LIMIT_EXCEEDED', ))]
+#[should_panic(expected: ('MKT_DEPOSIT_LIMIT_EXCEEDED',))]
 fn test_deposit_cannot_exceed_deposit_limit() {
     let setup = setup_with_alice_and_bob_deposit();
 
@@ -722,7 +703,7 @@ fn test_can_deposit_till_deposit_limit() {
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(expected: ('MKT_DEPOSIT_LIMIT_EXCEEDED', ))]
+#[should_panic(expected: ('MKT_DEPOSIT_LIMIT_EXCEEDED',))]
 fn test_deposit_limit_is_global() {
     let setup = setup_with_alice_and_bob_deposit();
 
@@ -810,20 +791,21 @@ fn test_interest_accumulation() {
 
     // No interest accumulated yet
     assert_eq!(
-        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000000000000000000, "FAILED"
+        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000000000000000000, "FAILED",
     );
 
     start_cheat_block_timestamp_global(100);
 
     // Interest after 100 seconds:
-    //   Interest = 0.000113765625 * 10000 * 100 * (1 - 20%) / (365 * 86400) = 0.000002885987442922374429223
+    //   Interest = 0.000113765625 * 10000 * 100 * (1 - 20%) / (365 * 86400) =
+    //   0.000002885987442922374429223
     //                                                         => 2885987442922
     //   Total balance = 10000 * 10 ** 18 + 2885987442922
     // @10000000003607484303652
     // @10000000002885987442922
     // @10000000003607484303652
     assert_eq!(
-        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000002885987442922, "FAILED"
+        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000002885987442922, "FAILED",
     );
 }
 
@@ -838,7 +820,7 @@ fn test_debt_accumulation() {
             .market
             .get_user_debt_for_token(setup.alice.contract_address, setup.token_b.contract_address),
         @22500000000000000000,
-        "FAILED"
+        "FAILED",
     );
 
     start_cheat_block_timestamp_global(100);
@@ -852,12 +834,12 @@ fn test_debt_accumulation() {
             .market
             .get_user_debt_for_token(setup.alice.contract_address, setup.token_b.contract_address),
         @22500003607484303652,
-        "FAILED"
+        "FAILED",
     );
     assert_eq!(
         @setup.market.get_total_debt_for_token(setup.token_b.contract_address),
         @22500003607484303652,
-        "FAILED"
+        "FAILED",
     );
 }
 
@@ -894,7 +876,7 @@ fn test_repay_all_with_interest() {
     // Alice TST_B balance:
     //   22.5 + 1 - 22.500003607484303652 = 0.999996392515696348
     assert_eq!(
-        @setup.token_b.balanceOf(setup.alice.contract_address), @999996392515696348, "FAILED"
+        @setup.token_b.balanceOf(setup.alice.contract_address), @999996392515696348, "FAILED",
     );
 
     // No more debt in system
@@ -903,9 +885,11 @@ fn test_repay_all_with_interest() {
             .market
             .get_user_debt_for_token(setup.alice.contract_address, setup.token_b.contract_address),
         @0,
-        "FAILED"
+        "FAILED",
     );
-    assert_eq!(@setup.market.get_total_debt_for_token(setup.token_b.contract_address), @0, "FAILED");
+    assert_eq!(
+        @setup.market.get_total_debt_for_token(setup.token_b.contract_address), @0, "FAILED",
+    );
 
     // No more debt accumulation
 
@@ -916,9 +900,11 @@ fn test_repay_all_with_interest() {
             .market
             .get_user_debt_for_token(setup.alice.contract_address, setup.token_b.contract_address),
         @0,
-        "FAILED"
+        "FAILED",
     );
-    assert_eq!(@setup.market.get_total_debt_for_token(setup.token_b.contract_address), @0, "FAILED");
+    assert_eq!(
+        @setup.market.get_total_debt_for_token(setup.token_b.contract_address), @0, "FAILED",
+    );
 }
 
 #[test]
@@ -949,18 +935,17 @@ fn test_no_debt_accumulation_without_loan() {
     assert_eq!(
         @setup.market.get_debt_accumulator(setup.token_a.contract_address),
         @1000000000000000000000000000,
-        "FAILED"
+        "FAILED",
     );
 
     start_cheat_block_timestamp_global(100);
-
 
     // Still no accumulation after 100 seconds
 
     assert_eq!(
         @setup.market.get_debt_accumulator(setup.token_a.contract_address),
         @1000000000000000000000000000,
-        "FAILED"
+        "FAILED",
     );
 }
 
@@ -996,18 +981,18 @@ fn test_debt_repayment() {
             .market
             .get_user_debt_for_token(setup.alice.contract_address, setup.token_b.contract_address),
         @21500003607484303653,
-        "FAILED"
+        "FAILED",
     );
     assert_eq!(
         @setup.market.get_total_debt_for_token(setup.token_b.contract_address),
         @21500003607484303653,
-        "FAILED"
+        "FAILED",
     );
     assert_eq!(
-        @setup.token_b.balanceOf(setup.alice.contract_address), @21500000000000000000, "FAILED"
+        @setup.token_b.balanceOf(setup.alice.contract_address), @21500000000000000000, "FAILED",
     );
     assert_eq!(
-        @setup.token_b.balanceOf(setup.market.contract_address), @9978500000000000000000, "FAILED"
+        @setup.token_b.balanceOf(setup.market.contract_address), @9978500000000000000000, "FAILED",
     );
 
     // Interest rates after repayment
@@ -1027,8 +1012,7 @@ fn test_debt_repayment() {
 #[test]
 #[available_gas(90000000)]
 // #[should_panic(expected: ('MKT_INVALID_LIQUIDATION', ))]
-#[should_panic(expected: ('MKT_INVALID_LIQUIDATION', ))]
-
+#[should_panic(expected: ('MKT_INVALID_LIQUIDATION',))]
 fn test_cannot_liquidate_healthy_positions() {
     let setup = setup_with_loan();
 
@@ -1051,8 +1035,8 @@ fn test_cannot_liquidate_healthy_positions() {
         .oracle
         .set_price(
             setup.token_a.contract_address, // token
-             45_00000000, // price
-             100 // update_time
+            45_00000000, // price
+            100 // update_time
         );
 
     // Cannot liquidate now as Alice is not undercollateralized
@@ -1070,7 +1054,7 @@ fn test_cannot_liquidate_healthy_positions() {
 #[test]
 #[available_gas(90000000)]
 // #[should_panic(expected: ('MKT_INVALID_LIQUIDATION', ))]
-#[should_panic(expected: ('MKT_INVALID_LIQUIDATION', ))]
+#[should_panic(expected: ('MKT_INVALID_LIQUIDATION',))]
 fn test_cannot_liquidate_too_much() {
     let setup = setup_with_loan();
 
@@ -1094,8 +1078,8 @@ fn test_cannot_liquidate_too_much() {
         .oracle
         .set_price(
             setup.token_a.contract_address, // token
-             40_00000000, // price
-             100 // update_time
+            40_00000000, // price
+            100 // update_time
         );
 
     // Repay maximum x TST_B:
@@ -1148,8 +1132,8 @@ fn test_liquidation() {
         .oracle
         .set_price(
             setup.token_a.contract_address, // token
-             40_00000000, // price
-             100, // update_time
+            40_00000000, // price
+            100 // update_time
         );
 
     // Liquidating 6.25 TST_B works
@@ -1169,10 +1153,10 @@ fn test_liquidation() {
     //   TST_B:
     //     1,000,000 - 10,000 - 6.25 = 989,993.75 TST_B
     assert_eq!(
-        @setup.z_token_a.balanceOf(setup.bob.contract_address), @18750000000000000000, "FAILED"
+        @setup.z_token_a.balanceOf(setup.bob.contract_address), @18750000000000000000, "FAILED",
     );
     assert_eq!(
-        @setup.token_b.balanceOf(setup.bob.contract_address), @989993750000000000000000, "FAILED"
+        @setup.token_b.balanceOf(setup.bob.contract_address), @989993750000000000000000, "FAILED",
     );
 
     // Alice:
@@ -1185,15 +1169,15 @@ fn test_liquidation() {
             .market
             .get_user_debt_for_token(setup.alice.contract_address, setup.token_b.contract_address),
         @16250000000000000000,
-        "FAILED"
+        "FAILED",
     );
     assert_eq!(
         @setup.market.get_total_debt_for_token(setup.token_b.contract_address),
         @16250000000000000000,
-        "FAILED"
+        "FAILED",
     );
     assert_eq!(
-        @setup.z_token_a.balanceOf(setup.alice.contract_address), @81250000000000000000, "FAILED"
+        @setup.z_token_a.balanceOf(setup.alice.contract_address), @81250000000000000000, "FAILED",
     );
 }
 
@@ -1220,31 +1204,32 @@ fn test_event_emission() {
             100000000000000000000 // amount
         );
 
-    spy.assert_emitted(
-        @array![
-            (
-                setup.market.contract_address,
-                Market::Event::AccumulatorsSync(
-                    Market::AccumulatorsSync {
-                        token: setup.token_a.contract_address,
-                        lending_accumulator: 10_00000000000000000000000000,
-                        debt_accumulator: 10_00000000000000000000000000
-                    }
-                )
-            ),
-            (
-                setup.market.contract_address,
-                Market::Event::Deposit(
-                    Market::Deposit {
-                        user: setup.alice.contract_address,
-                        token: setup.token_a.contract_address,
-                        face_amount: 100_000000000000000000
-                    }
-                )
-            )
-        ]
-    );
-        
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    setup.market.contract_address,
+                    Market::Event::AccumulatorsSync(
+                        Market::AccumulatorsSync {
+                            token: setup.token_a.contract_address,
+                            lending_accumulator: 10_00000000000000000000000000,
+                            debt_accumulator: 10_00000000000000000000000000,
+                        },
+                    ),
+                ),
+                (
+                    setup.market.contract_address,
+                    Market::Event::Deposit(
+                        Market::Deposit {
+                            user: setup.alice.contract_address,
+                            token: setup.token_a.contract_address,
+                            face_amount: 100_000000000000000000,
+                        },
+                    ),
+                ),
+            ],
+        );
+
     // 100 seconds passed
     start_cheat_block_timestamp_global(100);
 
@@ -1265,34 +1250,34 @@ fn test_event_emission() {
             10000000000000000000000 // amount
         );
 
-    spy.assert_emitted(
-        @array![
-            (
-                setup.market.contract_address,
-                Market::Event::AccumulatorsSync(
-                    Market::AccumulatorsSync {
-                        token: setup.token_b.contract_address,
-                        lending_accumulator: 10_00000000000000000000000000,
-                        debt_accumulator: 10_00000000000000000000000000
-                    }
-                )
-            ),
-            (
-                setup.market.contract_address,
-                Market::Event::Deposit(
-                    Market::Deposit {
-                        user: setup.bob.contract_address,
-                        token: setup.token_b.contract_address,
-                        face_amount: 100_00000000000000000000
-                    }
-                )
-            )
-        ]
-    );
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    setup.market.contract_address,
+                    Market::Event::AccumulatorsSync(
+                        Market::AccumulatorsSync {
+                            token: setup.token_b.contract_address,
+                            lending_accumulator: 10_00000000000000000000000000,
+                            debt_accumulator: 10_00000000000000000000000000,
+                        },
+                    ),
+                ),
+                (
+                    setup.market.contract_address,
+                    Market::Event::Deposit(
+                        Market::Deposit {
+                            user: setup.bob.contract_address,
+                            token: setup.token_b.contract_address,
+                            face_amount: 100_00000000000000000000,
+                        },
+                    ),
+                ),
+            ],
+        );
 
     // 100 seconds passed
     start_cheat_block_timestamp_global(200);
-
 
     // Alice borrows 22.5 TST_B
     // Accumulators unchanged
@@ -1307,31 +1292,32 @@ fn test_event_emission() {
             22500000000000000000 // amount
         );
 
-    spy.assert_emitted(
-        @array![
-            (
-                setup.market.contract_address,
-                Market::Event::AccumulatorsSync(
-                    Market::AccumulatorsSync {
-                        token: setup.token_b.contract_address,
-                        lending_accumulator: 10_00000000000000000000000000,
-                        debt_accumulator: 10_00000000000000000000000000
-                    }
-                )
-            ),
-            (
-                setup.market.contract_address,
-                Market::Event::Borrowing(
-                    Market::Borrowing {
-                        user: setup.alice.contract_address,
-                        token: setup.token_b.contract_address,
-                        raw_amount: 22_500000000000000000,
-                        face_amount: 22_500000000000000000
-                    }
-                )
-            )
-        ]
-    );
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    setup.market.contract_address,
+                    Market::Event::AccumulatorsSync(
+                        Market::AccumulatorsSync {
+                            token: setup.token_b.contract_address,
+                            lending_accumulator: 10_00000000000000000000000000,
+                            debt_accumulator: 10_00000000000000000000000000,
+                        },
+                    ),
+                ),
+                (
+                    setup.market.contract_address,
+                    Market::Event::Borrowing(
+                        Market::Borrowing {
+                            user: setup.alice.contract_address,
+                            token: setup.token_b.contract_address,
+                            raw_amount: 22_500000000000000000,
+                            face_amount: 22_500000000000000000,
+                        },
+                    ),
+                ),
+            ],
+        );
 
     // 100 seconds passed
     start_cheat_block_timestamp_global(300);
@@ -1341,7 +1327,8 @@ fn test_event_emission() {
     //     Borrowing rate = 0.0505625
     //     Lending rate = 0.000113765625
     //   Lending accmulator:
-    //     1 * (1 + (100 * 0.000113765625 * (1 - 20%)) / (365 * 86400)) = 1.000000000288598744292237442
+    //     1 * (1 + (100 * 0.000113765625 * (1 - 20%)) / (365 * 86400)) =
+    //     1.000000000288598744292237442
     //   Debt accmulator:
     //     1 * (1 + (100 * 0.0505625) / (365 * 86400)) = 1.000000160332635717909690512
 
@@ -1362,32 +1349,33 @@ fn test_event_emission() {
             setup.token_b.contract_address, // token
             1000000000000000000 // amount
         );
-    spy.assert_emitted(
-        @array![
-            (
-                setup.market.contract_address,
-                Market::Event::AccumulatorsSync(
-                    Market::AccumulatorsSync {
-                        token: setup.token_b.contract_address,
-                        lending_accumulator: 1000000000288598744292237442,
-                        debt_accumulator: 1000000160332635717909690512
-                    }
-                )
-            ),
-            (
-                setup.market.contract_address,
-                Market::Event::Repayment(
-                    Market::Repayment {
-                        repayer: setup.alice.contract_address,
-                        beneficiary: setup.alice.contract_address,
-                        token: setup.token_b.contract_address,
-                        raw_amount: 999999839667389988,
-                        face_amount: 1000000000000000000
-                    }
-                )
-            )
-        ]
-    );
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    setup.market.contract_address,
+                    Market::Event::AccumulatorsSync(
+                        Market::AccumulatorsSync {
+                            token: setup.token_b.contract_address,
+                            lending_accumulator: 1000000000288598744292237442,
+                            debt_accumulator: 1000000160332635717909690512,
+                        },
+                    ),
+                ),
+                (
+                    setup.market.contract_address,
+                    Market::Event::Repayment(
+                        Market::Repayment {
+                            repayer: setup.alice.contract_address,
+                            beneficiary: setup.alice.contract_address,
+                            token: setup.token_b.contract_address,
+                            raw_amount: 999999839667389988,
+                            face_amount: 1000000000000000000,
+                        },
+                    ),
+                ),
+            ],
+        );
 
     // 100 seconds passed
     start_cheat_block_timestamp_global(400);
@@ -1397,10 +1385,12 @@ fn test_event_emission() {
     //     Borrowing rate = 0.050537500089993205277538743
     //     Lending rate = 0.000108655643385611870596273
     //   Lending accmulator:
-    //     1.000000000288598744292237442 * (1 + (100 * 0.000108655643385611870596273 * (1 - 20%)) / (365 * 86400))
+    //     1.000000000288598744292237442 * (1 + (100 * 0.000108655643385611870596273 * (1 - 20%)) /
+    //     (365 * 86400))
     //     = 1.000000000564234572341374307
     //   Debt accmulator:
-    //     1.000000160332635717909690512 * (1 + (100 * 0.050537500089993205277538743) / (365 * 86400))
+    //     1.000000160332635717909690512 * (1 + (100 * 0.050537500089993205277538743) / (365 *
+    //     86400))
     //     = 1.000000320586022935070387176
 
     // Bob withdraws 5,000 TST_B
@@ -1411,30 +1401,31 @@ fn test_event_emission() {
             setup.token_b.contract_address, // token
             5000_000000000000000000 // amount
         );
-    spy.assert_emitted(
-        @array![
-            (
-                setup.market.contract_address,
-                Market::Event::AccumulatorsSync(
-                    Market::AccumulatorsSync {
-                        token: setup.token_b.contract_address,
-                        lending_accumulator: 10_00000000564234572341374307,
-                        debt_accumulator: 10_00000320586022935070387176
-                    }
-                )
-            ),
-            (
-                setup.market.contract_address,
-                Market::Event::Withdrawal(
-                    Market::Withdrawal {
-                        user: setup.bob.contract_address,
-                        token: setup.token_b.contract_address,
-                        face_amount: 5000_000000000000000000
-                    }
-                )
-            )
-        ]
-    );
+    spy
+        .assert_emitted(
+            @array![
+                (
+                    setup.market.contract_address,
+                    Market::Event::AccumulatorsSync(
+                        Market::AccumulatorsSync {
+                            token: setup.token_b.contract_address,
+                            lending_accumulator: 10_00000000564234572341374307,
+                            debt_accumulator: 10_00000320586022935070387176,
+                        },
+                    ),
+                ),
+                (
+                    setup.market.contract_address,
+                    Market::Event::Withdrawal(
+                        Market::Withdrawal {
+                            user: setup.bob.contract_address,
+                            token: setup.token_b.contract_address,
+                            face_amount: 5000_000000000000000000,
+                        },
+                    ),
+                ),
+            ],
+        );
 }
 
 #[test]
@@ -1464,9 +1455,7 @@ fn test_flashloan_succeeds_with_enough_fees() {
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(
-    expected: ('MKT_INSUFFICIENT_AMOUNT_REPAID', )
-)]
+#[should_panic(expected: ('MKT_INSUFFICIENT_AMOUNT_REPAID',))]
 fn test_flashloan_fails_without_enough_fees() {
     let setup = setup_with_loan();
     let callback = deploy::deploy_flash_loan_handler();
@@ -1508,7 +1497,7 @@ fn test_flashloan_fee_distribution() {
 
     // Bob has 10,000 TST_B as collateral now
     assert_eq!(
-        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000_000000000000000000, "FAILED"
+        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000_000000000000000000, "FAILED",
     );
 
     // Flashloan pays 100 TST_B as fee
@@ -1523,20 +1512,20 @@ fn test_flashloan_fee_distribution() {
     // Bob should has 10,080 TST_B now as the only depositor
     // (reserve takes 20% of the fees)
     assert_approximatedly_equals(
-        setup.z_token_b.balanceOf(setup.bob.contract_address), 10080_000000000000000000, 1
+        setup.z_token_b.balanceOf(setup.bob.contract_address), 10080_000000000000000000, 1,
     );
     assert_approximatedly_equals(
-        setup.z_token_b.balanceOf(MOCK_TREASURY_ADDRESS()),
-        20_000000000000000000,
-        1
+        setup.z_token_b.balanceOf(MOCK_TREASURY_ADDRESS()), 20_000000000000000000, 1,
     );
     assert_approximatedly_equals(setup.z_token_b.totalSupply(), 10100_000000000000000000, 1);
 
     // Borrowing rate:
     //   Utilization rate = 22.5 / 10,100 = 0.002227722772277227722772277
-    //   Borrowing rate = 0.05 + 0.2 * 0.002227722772277227722772277 / 0.8 = 0.050556930693069306930693069 => 50556930693069306930693069
+    //   Borrowing rate = 0.05 + 0.2 * 0.002227722772277227722772277 / 0.8 =
+    //   0.050556930693069306930693069 => 50556930693069306930693069
     // Lending rate:
-    //   Lending rate = 0.050556930693069306930693069 * 0.002227722772277227722772277 = 0.000112626825801392020390157 => 112626825801392020390157
+    //   Lending rate = 0.050556930693069306930693069 * 0.002227722772277227722772277 =
+    //   0.000112626825801392020390157 => 112626825801392020390157
     let reserve_data = setup.market.get_reserve_data(setup.token_b.contract_address);
     assert_eq!(@reserve_data.current_lending_rate, @112626825801392020390157, "FAILED");
     assert_eq!(@reserve_data.current_borrowing_rate, @50556930693069306930693069, "FAILED");
@@ -1559,14 +1548,14 @@ fn test_change_interest_rate_model() {
 
     start_cheat_block_timestamp_global(100);
 
-
     // (Copied from `test_interest_accumulation`)
     // Interest after 100 seconds:
-    //   Interest = 0.000113765625 * 10000 * 100 * (1 - 20%) / (365 * 86400) = 0.000002885987442922374429223
+    //   Interest = 0.000113765625 * 10000 * 100 * (1 - 20%) / (365 * 86400) =
+    //   0.000002885987442922374429223
     //                                                         => 2885987442922
     //   Total balance = 10000 * 10 ** 18 + 2885987442922
     assert_eq!(
-        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000002885987442922, "FAILED"
+        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000002885987442922, "FAILED",
     );
 
     // Change model to have higher interest rate
@@ -1574,7 +1563,7 @@ fn test_change_interest_rate_model() {
         400000000000000000000000000, // slope_0: 0.4
         300000000000000000000000000, // slope_1: 0.3
         500000000000000000000000000, // y_intercept: 50%
-        800000000000000000000000000, // optimal_rate: 80%
+        800000000000000000000000000 // optimal_rate: 80%
     );
     setup
         .alice
@@ -1588,28 +1577,30 @@ fn test_change_interest_rate_model() {
     //   Interest = 0.0505625 * 22.5 * 100 / (365 * 86400) = 0.000003607484303652
 
     // New borrowing rate:
-    //   Utilization rate = 22.500003607484303652 / 10000.000003607484303652 = 0.002250000359936746267031683
-    //   Borrowing rate = 0.5 + 0.4 * 0.002250000359936746267031683 / 0.8 = 0.501125000179968373133515841
+    //   Utilization rate = 22.500003607484303652 / 10000.000003607484303652 =
+    //   0.002250000359936746267031683 Borrowing rate = 0.5 + 0.4 * 0.002250000359936746267031683 /
+    //   0.8 = 0.501125000179968373133515841
     // New lending rate:
-    //   Lending rate = 0.501125000179968373133515841 * 0.002250000359936746267031683 = 0.001127531430778230877393893
+    //   Lending rate = 0.501125000179968373133515841 * 0.002250000359936746267031683 =
+    //   0.001127531430778230877393893
     let reserve_data = setup.market.get_reserve_data(setup.token_b.contract_address);
     assert_eq!(@reserve_data.current_lending_rate, @1127531430778230877393893, "FAILED");
     assert_eq!(@reserve_data.current_borrowing_rate, @501125000179968373133515841, "FAILED");
 
-
     start_cheat_block_timestamp_global(200);
 
     // Another 100 seconds (accumulating with the new rate):
-    //   Interest = 0.001127531430778230877393893 * 10000.000002885987442922 * 100 * (1 - 20%) / (365 * 86400) = 0.000028603029708362
-    //   Total balance = 10000.000002885987442922 + 0.000028603029708362 = 10000.000031489017151284
+    //   Interest = 0.001127531430778230877393893 * 10000.000002885987442922 * 100 * (1 - 20%) /
+    //   (365 * 86400) = 0.000028603029708362 Total balance = 10000.000002885987442922 +
+    //   0.000028603029708362 = 10000.000031489017151284
     assert_eq!(
-        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000031489017151284, "FAILED"
+        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000031489017151284, "FAILED",
     );
 }
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(expected: ('MKT_INSUFFICIENT_COLLATERAL', ))]
+#[should_panic(expected: ('MKT_INSUFFICIENT_COLLATERAL',))]
 fn test_change_collateral_factor() {
     let setup = setup_with_alice_and_bob_deposit();
 
@@ -1640,7 +1631,7 @@ fn test_change_collateral_factor() {
 
 #[test]
 #[available_gas(90000000)]
-#[should_panic(expected: ('MKT_INSUFFICIENT_COLLATERAL', ))]
+#[should_panic(expected: ('MKT_INSUFFICIENT_COLLATERAL',))]
 fn test_change_borrow_factor() {
     let setup = setup_with_alice_and_bob_deposit();
 
@@ -1681,7 +1672,6 @@ fn test_change_reserve_factor() {
 
     start_cheat_block_timestamp_global(100);
 
-
     // Reserve balance is not updated without an actual settlement. We do a noop IRM change here to
     // just for triggering the settlement.
     setup
@@ -1697,7 +1687,7 @@ fn test_change_reserve_factor() {
     // Reserve interest:
     //   Interest = 0.000003607484303652 * 20% = 0.000000721496860730
     assert_approximatedly_equals(
-        setup.z_token_b.balanceOf(MOCK_TREASURY_ADDRESS()), 721496860730, 1
+        setup.z_token_b.balanceOf(MOCK_TREASURY_ADDRESS()), 721496860730, 1,
     );
 
     // Doubles reserve ratio to 40%
@@ -1706,7 +1696,7 @@ fn test_change_reserve_factor() {
         .market_set_reserve_factor(
             setup.market.contract_address,
             setup.token_b.contract_address, // token
-            400000000000000000000000000, // reserve_factor
+            400000000000000000000000000 // reserve_factor
         );
 
     // Trigger another settlement after 100 seconds
@@ -1721,20 +1711,25 @@ fn test_change_reserve_factor() {
         );
 
     // Borrowing rate:
-    //   Utilization rate = 22.500003607484303652 / 10,000.000003607484303652 = 0.002250000359936746267031683
-    //   Borrowing rate = 0.05 + 0.2 * 0.002250000359936746267031683 / 0.8 = 0.050562500089984186566757920
+    //   Utilization rate = 22.500003607484303652 / 10,000.000003607484303652 =
+    //   0.002250000359936746267031683 Borrowing rate = 0.05 + 0.2 * 0.002250000359936746267031683 /
+    //   0.8 = 0.050562500089984186566757920
     // New lending rate:
-    //   Lending rate = 0.050562500089984186566757920 * 0.002250000359936746267031683 = 0.000113765643401766185290610
+    //   Lending rate = 0.050562500089984186566757920 * 0.002250000359936746267031683 =
+    //   0.000113765643401766185290610
     // Total interest after 100 seconds:
-    //   Interest = 0.050562500089984186566757920 * 22.500003607484303652 * 100 / (365 * 86400) = 0.000003607484888470
+    //   Interest = 0.050562500089984186566757920 * 22.500003607484303652 * 100 / (365 * 86400) =
+    //   0.000003607484888470
     // Reserve interest:
     //   Interest = 0.000003607484888470 * 40% = 0.000001442993955388
     // Interest on previous reserve balance:
-    //   Interest = 0.000113765643401766185290610 * 0.000000721496860730 * 100 / (365 * 86400) * (1 - 40%) = 0.000000000000000156
+    //   Interest = 0.000113765643401766185290610 * 0.000000721496860730 * 100 / (365 * 86400) * (1
+    //   - 40%) = 0.000000000000000156
     // New balance:
-    //   Balance = 0.000000721496860730 + 0.000000000000000156 + 0.000001442993955388 = 0.000002164490816274
+    //   Balance = 0.000000721496860730 + 0.000000000000000156 + 0.000001442993955388 =
+    //   0.000002164490816274
     assert_approximatedly_equals(
-        setup.z_token_b.balanceOf(MOCK_TREASURY_ADDRESS()), 2164490816274, 1
+        setup.z_token_b.balanceOf(MOCK_TREASURY_ADDRESS()), 2164490816274, 1,
     );
 }
 
@@ -1771,7 +1766,7 @@ fn test_prelisted_token_may_have_price_source_unset() {
             1000000000000000000000000000, // borrow_factor
             0, // reserve_factor
             0, // flash_loan_fee
-            0, // liquidation_bonus
+            0 // liquidation_bonus
         );
 
     // Alice deposits token C and enables collateral

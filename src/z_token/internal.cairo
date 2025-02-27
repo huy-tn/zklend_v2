@@ -1,15 +1,10 @@
-// use traits::Into;
-// use zeroable::Zeroable;
-use core::num::traits::{Bounded, Zero};
+use core::num::traits::Zero;
 
 use starknet::event::EventEmitter;
 use starknet::{ContractAddress, get_caller_address};
 
-// Hack to simulate the `crate` keyword
-use super::super as crate;
-
-use crate::interfaces::{IMarketDispatcher, IMarketDispatcherTrait};
-use crate::libraries::{safe_decimal_math, safe_math};
+use zklend_v2::interfaces::{IMarketDispatcher, IMarketDispatcherTrait};
+use zklend_v2::libraries::{safe_decimal_math, safe_math};
 
 use super::errors;
 
@@ -17,14 +12,8 @@ use super::ZToken as contract;
 
 use contract::ContractState;
 
-use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
+use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess};
 use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-
-// These are hacks that depend on compiler implementation details :(
-// But they're needed for refactoring the contract code into modules like this one.
-// use contract::marketContractMemberStateTrait;
-// use contract::raw_balancesContractMemberStateTrait;
-// use contract::underlyingContractMemberStateTrait;
 
 pub fn only_market(self: @ContractState) {
     let market_addr = self.market.read();

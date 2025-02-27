@@ -14,11 +14,7 @@ struct UpdatedAccumulators {
 pub mod Market {
     use starknet::{ClassHash, ContractAddress};
 
-
-    // Hack to simulate the `crate` keyword
-    // use super::super as crate;
-
-    use zklend_v2::interfaces::{IMarket, MarketReserveData};
+    use crate::interfaces::{IMarket, MarketReserveData};
 
     use super::{external, view};
 

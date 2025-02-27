@@ -15,7 +15,7 @@ fn test_borrow_rates() {
         100000000000000000000000000, // slope_0
         500000000000000000000000000, // slope_1
         10000000000000000000000000, // y_intercept
-        800000000000000000000000000, // optimal_rate
+        800000000000000000000000000 // optimal_rate
     );
 
     // 0% utilized: 0%
@@ -26,7 +26,7 @@ fn test_borrow_rates() {
     assert_eq(
         @default_interest_rate_model.get_interest_rates(90, 10).borrowing_rate,
         @22500000000000000000000000,
-        'FAILED'
+        'FAILED',
     );
 
     // 50% utilized:
@@ -34,7 +34,7 @@ fn test_borrow_rates() {
     assert_eq(
         @default_interest_rate_model.get_interest_rates(50, 50).borrowing_rate,
         @72500000000000000000000000,
-        'FAILED'
+        'FAILED',
     );
 
     // 60% utilized:
@@ -42,7 +42,7 @@ fn test_borrow_rates() {
     assert_eq(
         @default_interest_rate_model.get_interest_rates(40, 60).borrowing_rate,
         @85000000000000000000000000,
-        'FAILED'
+        'FAILED',
     );
 
     // 70% utilized:
@@ -50,7 +50,7 @@ fn test_borrow_rates() {
     assert_eq(
         @default_interest_rate_model.get_interest_rates(30, 70).borrowing_rate,
         @97500000000000000000000000,
-        'FAILED'
+        'FAILED',
     );
 
     // 90% utilized:
@@ -58,7 +58,7 @@ fn test_borrow_rates() {
     assert_eq(
         @default_interest_rate_model.get_interest_rates(10, 90).borrowing_rate,
         @360000000000000000000000000,
-        'FAILED'
+        'FAILED',
     );
 
     // 100% utilized:
@@ -66,7 +66,7 @@ fn test_borrow_rates() {
     assert_eq(
         @default_interest_rate_model.get_interest_rates(0, 100).borrowing_rate,
         @610000000000000000000000000,
-        'FAILED'
+        'FAILED',
     );
 }
 

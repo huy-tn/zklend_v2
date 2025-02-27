@@ -6,13 +6,8 @@ mod errors;
 
 #[starknet::contract]
 pub mod ZToken {
-    use core::array::SpanTrait;
-
-    use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
+    use starknet::storage::Map;
     use starknet::{ClassHash, ContractAddress};
-
-    // Hack to simulate the `crate` keyword
-    use super::super as crate;
 
     use crate::interfaces::IZToken;
 
@@ -91,7 +86,7 @@ pub mod ZToken {
         underlying: ContractAddress,
         name: felt252,
         symbol: felt252,
-        decimals: felt252
+        decimals: felt252,
     ) {
         external::initializer(ref self, owner, market, underlying, name, symbol, decimals)
     }
@@ -127,13 +122,13 @@ pub mod ZToken {
         }
 
         fn allowance(
-            self: @ContractState, owner: ContractAddress, spender: ContractAddress
+            self: @ContractState, owner: ContractAddress, spender: ContractAddress,
         ) -> u256 {
             view::allowance(self, owner, spender)
         }
 
         fn felt_allowance(
-            self: @ContractState, owner: ContractAddress, spender: ContractAddress
+            self: @ContractState, owner: ContractAddress, spender: ContractAddress,
         ) -> felt252 {
             view::felt_allowance(self, owner, spender)
         }
@@ -151,7 +146,7 @@ pub mod ZToken {
         }
 
         fn felt_transfer(
-            ref self: ContractState, recipient: ContractAddress, amount: felt252
+            ref self: ContractState, recipient: ContractAddress, amount: felt252,
         ) -> bool {
             external::felt_transfer(ref self, recipient, amount)
         }
@@ -160,7 +155,7 @@ pub mod ZToken {
             ref self: ContractState,
             sender: ContractAddress,
             recipient: ContractAddress,
-            amount: u256
+            amount: u256,
         ) -> bool {
             external::transferFrom(ref self, sender, recipient, amount)
         }
@@ -169,7 +164,7 @@ pub mod ZToken {
             ref self: ContractState,
             sender: ContractAddress,
             recipient: ContractAddress,
-            amount: felt252
+            amount: felt252,
         ) -> bool {
             external::felt_transfer_from(ref self, sender, recipient, amount)
         }
@@ -179,7 +174,7 @@ pub mod ZToken {
         }
 
         fn felt_approve(
-            ref self: ContractState, spender: ContractAddress, amount: felt252
+            ref self: ContractState, spender: ContractAddress, amount: felt252,
         ) -> bool {
             external::felt_approve(ref self, spender, amount)
         }
@@ -212,7 +207,7 @@ pub mod ZToken {
             ref self: ContractState,
             from_account: ContractAddress,
             to_account: ContractAddress,
-            amount: felt252
+            amount: felt252,
         ) {
             external::move(ref self, from_account, to_account, amount)
         }

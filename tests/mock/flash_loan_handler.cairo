@@ -17,7 +17,7 @@ pub mod FlashLoanHandler {
     struct CallbackParams {
         token: ContractAddress,
         market_addr: ContractAddress,
-        return_amount: felt252
+        return_amount: felt252,
     }
 
     #[abi(embed_v0)]
@@ -26,7 +26,7 @@ pub mod FlashLoanHandler {
         //           market contract! We're encoding the market address into callback data for
         //           simplicity only (avoid having to handle storage in a mock contract).
         fn zklend_flash_callback(
-            ref self: ContractState, initiator: ContractAddress, mut calldata: Span::<felt252>
+            ref self: ContractState, initiator: ContractAddress, mut calldata: Span::<felt252>,
         ) {
             // IMPORTANT: always check the initiator is a contract you trust, similar to how it's
             //            done here.
@@ -48,13 +48,13 @@ pub mod FlashLoanHandler {
             market_addr: ContractAddress,
             token: ContractAddress,
             amount: felt252,
-            return_amount: felt252
+            return_amount: felt252,
         ) {
             let this_address = get_contract_address();
 
             let mut calldata = array![];
             Serde::<
-                CallbackParams
+                CallbackParams,
             >::serialize(@CallbackParams { token, market_addr, return_amount }, ref calldata);
 
             IMarketDispatcher { contract_address: market_addr }
