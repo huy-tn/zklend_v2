@@ -3,18 +3,19 @@
 // use traits::TryInto;
 
 use starknet::{ContractAddress, contract_address_const};
+use snforge_std::{spy_events, EventSpyAssertionsTrait};
 
 use zklend_v2::interfaces::{IZTokenDispatcher, IZTokenDispatcherTrait};
 use zklend_v2::z_token::ZToken;
 
 use super::{deploy, event_keys};
-use super::assertions::assert_event_emitted;
 use super::mock::{
     IAccountDispatcher, IAccountDispatcherTrait, IMockMarketDispatcher, IMockMarketDispatcherTrait
 };
 
-const MOCK_TOKEN_ADDRESS: felt252 = 9999;
-
+fn MOCK_TOKEN_ADDRESS() -> ContractAddress {
+    'MOCK_TOKEN_ADDRESS'.try_into().unwrap()
+}
 #[derive(Drop)]
 struct Setup {
     alice: IAccountDispatcher,
@@ -32,7 +33,7 @@ fn setup() -> Setup {
     let z_token = deploy::deploy_z_token(
         contract_address_const::<999999>(), // owner
         market.contract_address, // market
-        MOCK_TOKEN_ADDRESS.try_into().unwrap(), // underlying
+        MOCK_TOKEN_ADDRESS(), // underlying
         'TOKEN_NAME', // name
         'TOKEN_SYMBOL', // symbol
         18 // decimals
@@ -40,7 +41,7 @@ fn setup() -> Setup {
 
     market
         .set_lending_accumulator(
-            MOCK_TOKEN_ADDRESS.try_into().unwrap(), // token
+            MOCK_TOKEN_ADDRESS(), // token
              1000000000000000000000000000 // value
         );
     market
@@ -51,7 +52,7 @@ fn setup() -> Setup {
         );
     market
         .set_lending_accumulator(
-            MOCK_TOKEN_ADDRESS.try_into().unwrap(), // token
+            MOCK_TOKEN_ADDRESS(), // token
              2000000000000000000000000000 // value
         );
 
@@ -78,74 +79,89 @@ fn test_balance_should_scale_with_accumulator() {
     );
 }
 
-// #[test]
-// #[available_gas(30000000)]
-// fn test_transfer_should_emit_events() {
-//     let setup = setup();
+#[test]
+#[available_gas(30000000)]
+fn test_transfer_should_emit_events() {
+    let setup = setup();
+    let mut spy = spy_events();
 
-//     setup
-//         .alice
-//         .erc20_transfer(
-//             setup.z_token.contract_address, // contract_address
-//             setup.bob.contract_address, // recipient
-//             50000000000000000000 // amount
-//         );
+    setup
+        .alice
+        .erc20_transfer(
+            setup.z_token.contract_address, // contract_address
+            setup.bob.contract_address, // recipient
+            50_000000000000000000 // amount
+        );
 
-//     assert_event_emitted(
-//         setup.z_token.contract_address,
-//         event_keys::TRANSFER,
-//         @ZToken::Transfer {
-//             from: setup.alice.contract_address,
-//             to: setup.bob.contract_address,
-//             value: 50000000000000000000
-//         }
-//     );
-//     assert_event_emitted(
-//         setup.z_token.contract_address,
-//         event_keys::RAW_TRANSFER,
-//         @ZToken::RawTransfer {
-//             from: setup.alice.contract_address,
-//             to: setup.bob.contract_address,
-//             raw_value: 25000000000000000000,
-//             accumulator: 2000000000000000000000000000,
-//             face_value: 50000000000000000000
-//         }
-//     );
-// }
+    spy.assert_emitted(
+        @array![
+            (
+                setup.z_token.contract_address,
+                ZToken::Event::Transfer(
+                    ZToken::Transfer {
+                        from: setup.alice.contract_address,
+                        to: setup.bob.contract_address,
+                        value: 50_000000000000000000
+                    }
+                )
+            ),
+            
+            (
+                setup.z_token.contract_address,
+                ZToken::Event::RawTransfer(
+                    ZToken::RawTransfer {
+                        from: setup.alice.contract_address,
+                        to: setup.bob.contract_address,
+                        raw_value: 25_000000000000000000,
+                        accumulator: 2_000000000000000000000000000,
+                        face_value: 50_000000000000000000
+                    }
+                )
+            )
+        ]
+    );
+}
 
-// #[test]
-// #[available_gas(30000000)]
-// fn test_transfer_all_should_emit_events() {
-//     let setup = setup();
+#[test]
+#[available_gas(30000000)]
+fn test_transfer_all_should_emit_events() {
+    let setup = setup();
+    let mut spy = spy_events();
 
-//     setup
-//         .alice
-//         .z_token_transfer_all(
-//             setup.z_token.contract_address, // contract_address
-//             setup.bob.contract_address // recipient
-//         );
+    setup
+        .alice
+        .z_token_transfer_all(
+            setup.z_token.contract_address, // contract_address
+            setup.bob.contract_address // recipient
+        );
 
-//     assert_event_emitted(
-//         setup.z_token.contract_address,
-//         event_keys::TRANSFER,
-//         @ZToken::Transfer {
-//             from: setup.alice.contract_address,
-//             to: setup.bob.contract_address,
-//             value: 200000000000000000000
-//         }
-//     );
-//     assert_event_emitted(
-//         setup.z_token.contract_address,
-//         event_keys::RAW_TRANSFER,
-//         @ZToken::RawTransfer {
-//             from: setup.alice.contract_address,
-//             to: setup.bob.contract_address,
-//             raw_value: 100000000000000000000,
-//             accumulator: 2000000000000000000000000000,
-//             face_value: 200000000000000000000
-//         }
-//     );
-// }
+    spy.assert_emitted(
+        @array![
+            (
+                setup.z_token.contract_address,
+                ZToken::Event::Transfer(
+                    ZToken::Transfer {
+                        from: setup.alice.contract_address,
+                        to: setup.bob.contract_address,
+                        value: 200_000000000000000000
+                    }
+                )
+            ),
+            (
+                setup.z_token.contract_address,
+                ZToken::Event::RawTransfer(
+                    ZToken::RawTransfer {
+                        from: setup.alice.contract_address,
+                        to: setup.bob.contract_address,
+                        raw_value: 100_000000000000000000,
+                        accumulator: 2_000000000000000000000000000,
+                        face_value: 200_000000000000000000
+                    }
+                )
+            )
+        ]
+    );
+}
 
 #[test]
 #[available_gas(30000000)]
@@ -168,7 +184,7 @@ fn test_approve_should_change_allowance() {
     setup
         .market
         .set_lending_accumulator(
-            MOCK_TOKEN_ADDRESS.try_into().unwrap(), // token
+            MOCK_TOKEN_ADDRESS(), // token
              3000000000000000000000000000 // value
         );
 
@@ -196,7 +212,7 @@ fn test_transfer_from() {
     setup
         .market
         .set_lending_accumulator(
-            MOCK_TOKEN_ADDRESS.try_into().unwrap(), // token
+            MOCK_TOKEN_ADDRESS(), // token
              4000000000000000000000000000 // value
         );
 
@@ -216,7 +232,7 @@ fn test_transfer_from() {
     setup
         .market
         .set_lending_accumulator(
-            MOCK_TOKEN_ADDRESS.try_into().unwrap(), // token
+            MOCK_TOKEN_ADDRESS(), // token
              8000000000000000000000000000 // value
         );
 
@@ -247,7 +263,7 @@ fn test_transfer_all() {
     setup
         .market
         .set_lending_accumulator(
-            MOCK_TOKEN_ADDRESS.try_into().unwrap(), // token
+            MOCK_TOKEN_ADDRESS(), // token
              4000000000000000000000000000 // value
         );
 
@@ -272,7 +288,7 @@ fn test_burn_all() {
     setup
         .market
         .set_lending_accumulator(
-            MOCK_TOKEN_ADDRESS.try_into().unwrap(), // token
+            MOCK_TOKEN_ADDRESS(), // token
              4000000000000000000000000000 // value
         );
     setup

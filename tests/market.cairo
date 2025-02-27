@@ -7,14 +7,15 @@ use core::traits::BitAnd;
 use starknet::contract_address_const;
 use starknet::ContractAddress;
 
-use snforge_std::start_cheat_block_timestamp_global;
+use snforge_std::{spy_events, EventSpyAssertionsTrait, start_cheat_block_timestamp_global};
+
 use zklend_v2::interfaces::{
     IInterestRateModelDispatcher, IMarketDispatcher, IMarketDispatcherTrait, IZTokenDispatcher,
     IZTokenDispatcherTrait
 };
 use zklend_v2::market::Market;
 
-use super::assertions::{assert_approximatedly_equals, assert_event_emitted};
+use super::assertions::assert_approximatedly_equals;
 use super::{deploy, event_keys};
 use super::mock::{
     IAccountDispatcher, IAccountDispatcherTrait, IERC20Dispatcher, IERC20DispatcherTrait,
@@ -30,13 +31,13 @@ fn MOCK_TREASURY_ADDRESS() -> ContractAddress {
     'MOCK_TREASURY_ADDRESS'.try_into().unwrap()
 }
 
-fn ALICE() -> ContractAddress {
-    'ALICE'.try_into().unwrap()
-}
+// fn ALICE() -> ContractAddress {
+//     'ALICE'.try_into().unwrap()
+// }
 
-fn BOB() -> ContractAddress {
-    'BOB'.try_into().unwrap()
-}
+// fn BOB() -> ContractAddress {
+//     'BOB'.try_into().unwrap()
+// }
 
 #[derive(Drop)]
 struct Setup {
@@ -240,139 +241,48 @@ fn setup_with_loan() -> Setup {
     setup
 }
 
+
 #[test]
 #[available_gas(90000000)]
-fn test_dumb() {
-    // let alice = deploy::deploy_account(1);
-    // let bob = deploy::deploy_account(2);
+fn test_new_reserve_event() {
+    let setup = pre_setup();
+    let mut spy = spy_events();
 
-    // let oracle = deploy::deploy_mock_price_oracle();
-    // let token_a = deploy::deploy_erc20(
-    //     'Test Token A', // name
-    //     'TST_A', // symbol
-    //     18, // decimals
-    //     1000000000000000000000000, // initial_supply
-    //     alice.contract_address // recipient
-    // );
+    setup
+        .alice
+        .market_add_reserve(
+            setup.market.contract_address,
+            setup.token_a.contract_address, // token
+            setup.z_token_a.contract_address, // z_token
+            setup.irm_a.contract_address, // interest_rate_model
+            500000000000000000000000000, // collateral_factor
+            800000000000000000000000000, // borrow_factor
+            100000000000000000000000000, // reserve_factor
+            50000000000000000000000000, // flash_loan_fee
+            200000000000000000000000000 // liquidation_bonus
+        );
 
-    // let market = deploy::deploy_market(ALICE(), oracle.contract_address);
-
-    // let z_token_a = deploy::deploy_z_token(
-    //     contract_address_const::<999999>(), // owner
-    //     market.contract_address, // market
-    //     token_a.contract_address, // underlying
-    //     'zkLend Interest-Bearing TST_A', // name
-    //     'zTST_A', // symbol
-    //     18 // decimals
-    // );
-
-    // let irm_a = deploy::deploy_default_interest_rate_model(
-    //     100000000000000000000000000, // slope_0: 0.1
-    //     500000000000000000000000000, // slope_1: 0.5
-    //     10000000000000000000000000, // y_intercept: 1%
-    //     600000000000000000000000000 // optimal_rate: 60%
-    // );
-
-    // let alice = deploy::deploy_account(1);
-    // let bob = deploy::deploy_account(2);
-
-    let oracle = deploy::deploy_mock_price_oracle();
-
-    let market = deploy::deploy_market(MOCK_TREASURY_ADDRESS(), MOCK_TREASURY_ADDRESS());
-
-    let token_a = deploy::deploy_erc20(
-        'Test Token A', // name
-        'TST_A', // symbol
-        18, // decimals
-        1000000000000000000000000, // initial_supply
-        MOCK_TREASURY_ADDRESS() // recipient
+    spy.assert_emitted(
+        @array![
+            (
+                setup.market.contract_address,
+                Market::Event::NewReserve(
+                    Market::NewReserve {
+                        token: setup.token_a.contract_address,
+                        z_token: setup.z_token_a.contract_address,
+                        decimals: 18,
+                        interest_rate_model: setup.irm_a.contract_address,
+                        collateral_factor: 500000000000000000000000000,
+                        borrow_factor: 800000000000000000000000000,
+                        reserve_factor: 100000000000000000000000000,
+                        flash_loan_fee: 50000000000000000000000000,
+                        liquidation_bonus: 200000000000000000000000000
+                    }
+                )
+            )
+        ]
     );
-    let z_token_a = deploy::deploy_z_token(
-        contract_address_const::<999999>(), // owner
-        market.contract_address, // market
-        token_a.contract_address, // underlying
-        'zkLend Interest-Bearing TST_A', // name
-        'zTST_A', // symbol
-        18 // decimals
-    );
-    let irm_a = deploy::deploy_default_interest_rate_model(
-        100000000000000000000000000, // slope_0: 0.1
-        500000000000000000000000000, // slope_1: 0.5
-        10000000000000000000000000, // y_intercept: 1%
-        600000000000000000000000000 // optimal_rate: 60%
-    );
-
-    let token_b = deploy::deploy_erc20(
-        'Test Token B', // name
-        'TST_B', // symbol
-        18, // decimals
-        1000000000000000000000000, // initial_supply
-        MOCK_TREASURY_ADDRESS() // recipient
-    );
-    let z_token_b = deploy::deploy_z_token(
-        contract_address_const::<999999>(), // owner
-        market.contract_address, // market
-        token_b.contract_address, // underlying
-        'zkLend Interest-Bearing TST_B', // name
-        'zTST_B', // symbol
-        18 // decimals
-    );
-    let irm_b = deploy::deploy_default_interest_rate_model(
-        200000000000000000000000000, // slope_0: 0.2
-        300000000000000000000000000, // slope_1: 0.3
-        50000000000000000000000000, // y_intercept: 5%
-        800000000000000000000000000, // optimal_rate: 80%
-    );
-
-
-    // let setup = pre_setup();
-
-    // market.set_treasury(MOCK_TREASURY_ADDRESS());
-    // alice.market_set_treasury(
-    //     market.contract_address, MOCK_TREASURY_ADDRESS()
-    // );
-    token_a.name();
-    token_b.name();
-
-
-    // assert_eq!(@1, @1, "");
 }
-
-// #[test]
-// #[available_gas(90000000)]
-// fn test_new_reserve_event() {
-//     let setup = pre_setup();
-
-//     setup
-//         .alice
-//         .market_add_reserve(
-//             setup.market.contract_address,
-//             setup.token_a.contract_address, // token
-//             setup.z_token_a.contract_address, // z_token
-//             setup.irm_a.contract_address, // interest_rate_model
-//             500000000000000000000000000, // collateral_factor
-//             800000000000000000000000000, // borrow_factor
-//             100000000000000000000000000, // reserve_factor
-//             50000000000000000000000000, // flash_loan_fee
-//             200000000000000000000000000 // liquidation_bonus
-//         );
-
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::NEW_RESERVE,
-//         @Market::NewReserve {
-//             token: setup.token_a.contract_address,
-//             z_token: setup.z_token_a.contract_address,
-//             decimals: 18,
-//             interest_rate_model: setup.irm_a.contract_address,
-//             collateral_factor: 500000000000000000000000000,
-//             borrow_factor: 800000000000000000000000000,
-//             reserve_factor: 100000000000000000000000000,
-//             flash_loan_fee: 50000000000000000000000000,
-//             liquidation_bonus: 200000000000000000000000000
-//         }
-//     );
-// }
 
 // Context: there was a bug in commit 98cc54b that incorrectly enables collateral usage when calling
 // the disable function on an already-disabled collteral.
@@ -903,7 +813,6 @@ fn test_interest_accumulation() {
         @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000000000000000000, "FAILED"
     );
 
-    //     // starknet::testing::set_block_timestamp(100);
     start_cheat_block_timestamp_global(100);
 
     // Interest after 100 seconds:
@@ -932,9 +841,7 @@ fn test_debt_accumulation() {
         "FAILED"
     );
 
-        //     // starknet::testing::set_block_timestamp(100);
     start_cheat_block_timestamp_global(100);
-
 
     // Interest after 100 seconds:
     //   Interest = 0.0505625 * 22.5 * 100 / (365 * 86400) = 0.000003607484303652968036529
@@ -959,7 +866,6 @@ fn test_debt_accumulation() {
 fn test_repay_all_with_interest() {
     let setup = setup_with_loan();
 
-        //     // starknet::testing::set_block_timestamp(100);
     start_cheat_block_timestamp_global(100);
 
     // Same as `test_debt_accumulation`
@@ -1003,9 +909,7 @@ fn test_repay_all_with_interest() {
 
     // No more debt accumulation
 
-    // starknet::testing::set_block_timestamp(200);
     start_cheat_block_timestamp_global(200);
-
 
     assert_eq!(
         @setup
@@ -1048,7 +952,6 @@ fn test_no_debt_accumulation_without_loan() {
         "FAILED"
     );
 
-        //     // starknet::testing::set_block_timestamp(100);
     start_cheat_block_timestamp_global(100);
 
 
@@ -1067,7 +970,6 @@ fn test_debt_repayment() {
     let setup = setup_with_loan();
 
     // Total debt is 22.500003607484303652 (based on `test_debt_accumulation`)
-        //     // starknet::testing::set_block_timestamp(100);
     start_cheat_block_timestamp_global(100);
 
     // Alice repays 1 TST_B
@@ -1295,218 +1197,245 @@ fn test_liquidation() {
     );
 }
 
-// #[test]
-// #[available_gas(90000000)]
-// fn test_event_emission() {
-//     let setup = setup();
+#[test]
+#[available_gas(90000000)]
+fn test_event_emission() {
+    let setup = setup();
+    let mut spy = spy_events();
 
-//     setup
-//         .alice
-//         .erc20_approve(
-//             setup.token_a.contract_address,
-//             setup.market.contract_address, // spender
-//             100000000000000000000 // amount
-//         );
+    setup
+        .alice
+        .erc20_approve(
+            setup.token_a.contract_address,
+            setup.market.contract_address, // spender
+            100000000000000000000 // amount
+        );
 
-//     // Deposit emits the events
-//     setup
-//         .alice
-//         .market_deposit(
-//             setup.market.contract_address,
-//             setup.token_a.contract_address, // token
-//             100000000000000000000 // amount
-//         );
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::ACCUMULATORS_SYNC,
-//         @Market::AccumulatorsSync {
-//             token: setup.token_a.contract_address,
-//             lending_accumulator: 1000000000000000000000000000,
-//             debt_accumulator: 1000000000000000000000000000
-//         }
-//     );
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::DEPOSIT,
-//         @Market::Deposit {
-//             user: setup.alice.contract_address,
-//             token: setup.token_a.contract_address,
-//             face_amount: 100000000000000000000
-//         }
-//     );
+    // Deposit emits the events
+    setup
+        .alice
+        .market_deposit(
+            setup.market.contract_address,
+            setup.token_a.contract_address, // token
+            100000000000000000000 // amount
+        );
 
-//     // 100 seconds passed
-//         // starknet::testing::set_block_timestamp(100);
-//     start_cheat_block_timestamp_global(100);
+    spy.assert_emitted(
+        @array![
+            (
+                setup.market.contract_address,
+                Market::Event::AccumulatorsSync(
+                    Market::AccumulatorsSync {
+                        token: setup.token_a.contract_address,
+                        lending_accumulator: 10_00000000000000000000000000,
+                        debt_accumulator: 10_00000000000000000000000000
+                    }
+                )
+            ),
+            (
+                setup.market.contract_address,
+                Market::Event::Deposit(
+                    Market::Deposit {
+                        user: setup.alice.contract_address,
+                        token: setup.token_a.contract_address,
+                        face_amount: 100_000000000000000000
+                    }
+                )
+            )
+        ]
+    );
+        
+    // 100 seconds passed
+    start_cheat_block_timestamp_global(100);
 
+    // Bob deposits 10,000 TST_B so that Alice can borrow.
+    // Accumulators unchanged
+    setup
+        .bob
+        .erc20_approve(
+            setup.token_b.contract_address,
+            setup.market.contract_address, // spender
+            1000000000000000000000000 // amount
+        );
+    setup
+        .bob
+        .market_deposit(
+            setup.market.contract_address,
+            setup.token_b.contract_address, // token
+            10000000000000000000000 // amount
+        );
 
-//     // Bob deposits 10,000 TST_B so that Alice can borrow.
-//     // Accumulators unchanged
-//     setup
-//         .bob
-//         .erc20_approve(
-//             setup.token_b.contract_address,
-//             setup.market.contract_address, // spender
-//             1000000000000000000000000 // amount
-//         );
-//     setup
-//         .bob
-//         .market_deposit(
-//             setup.market.contract_address,
-//             setup.token_b.contract_address, // token
-//             10000000000000000000000 // amount
-//         );
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::ACCUMULATORS_SYNC,
-//         @Market::AccumulatorsSync {
-//             token: setup.token_b.contract_address,
-//             lending_accumulator: 1000000000000000000000000000,
-//             debt_accumulator: 1000000000000000000000000000
-//         }
-//     );
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::DEPOSIT,
-//         @Market::Deposit {
-//             user: setup.bob.contract_address,
-//             token: setup.token_b.contract_address,
-//             face_amount: 10000000000000000000000
-//         }
-//     );
+    spy.assert_emitted(
+        @array![
+            (
+                setup.market.contract_address,
+                Market::Event::AccumulatorsSync(
+                    Market::AccumulatorsSync {
+                        token: setup.token_b.contract_address,
+                        lending_accumulator: 10_00000000000000000000000000,
+                        debt_accumulator: 10_00000000000000000000000000
+                    }
+                )
+            ),
+            (
+                setup.market.contract_address,
+                Market::Event::Deposit(
+                    Market::Deposit {
+                        user: setup.bob.contract_address,
+                        token: setup.token_b.contract_address,
+                        face_amount: 100_00000000000000000000
+                    }
+                )
+            )
+        ]
+    );
 
-//     // 100 seconds passed
-//     // starknet::testing::set_block_timestamp(200);
-//     start_cheat_block_timestamp_global(200);
-
-
-//     // Alice borrows 22.5 TST_B
-//     // Accumulators unchanged
-//     setup
-//         .alice
-//         .market_enable_collateral(setup.market.contract_address, setup.token_a.contract_address);
-//     setup
-//         .alice
-//         .market_borrow(
-//             setup.market.contract_address,
-//             setup.token_b.contract_address, // token
-//             22500000000000000000 // amount
-//         );
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::ACCUMULATORS_SYNC,
-//         @Market::AccumulatorsSync {
-//             token: setup.token_b.contract_address,
-//             lending_accumulator: 1000000000000000000000000000,
-//             debt_accumulator: 1000000000000000000000000000
-//         }
-//     );
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::BORROWING,
-//         @Market::Borrowing {
-//             user: setup.alice.contract_address,
-//             token: setup.token_b.contract_address,
-//             raw_amount: 22500000000000000000,
-//             face_amount: 22500000000000000000
-//         }
-//     );
-
-//     // 100 seconds passed
-//     // starknet::testing::set_block_timestamp(300);
-//     start_cheat_block_timestamp_global(300);
+    // 100 seconds passed
+    start_cheat_block_timestamp_global(200);
 
 
-//     // Accumulations:
-//     //   Interest rate (see `test_borrow_token`):
-//     //     Borrowing rate = 0.0505625
-//     //     Lending rate = 0.000113765625
-//     //   Lending accmulator:
-//     //     1 * (1 + (100 * 0.000113765625 * (1 - 20%)) / (365 * 86400)) = 1.000000000288598744292237442
-//     //   Debt accmulator:
-//     //     1 * (1 + (100 * 0.0505625) / (365 * 86400)) = 1.000000160332635717909690512
+    // Alice borrows 22.5 TST_B
+    // Accumulators unchanged
+    setup
+        .alice
+        .market_enable_collateral(setup.market.contract_address, setup.token_a.contract_address);
+    setup
+        .alice
+        .market_borrow(
+            setup.market.contract_address,
+            setup.token_b.contract_address, // token
+            22500000000000000000 // amount
+        );
 
-//     // Alice repays 1 TST_B
-//     //   Raw amount repaid:
-//     //     1 / 1.000000160332635717909690512 = 0.999999839667389988
-//     setup
-//         .alice
-//         .erc20_approve(
-//             setup.token_b.contract_address,
-//             setup.market.contract_address, // spender
-//             1000000000000000000 // amount
-//         );
-//     setup
-//         .alice
-//         .market_repay(
-//             setup.market.contract_address,
-//             setup.token_b.contract_address, // token
-//             1000000000000000000 // amount
-//         );
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::ACCUMULATORS_SYNC,
-//         @Market::AccumulatorsSync {
-//             token: setup.token_b.contract_address,
-//             lending_accumulator: 1000000000288598744292237442,
-//             debt_accumulator: 1000000160332635717909690512
-//         }
-//     );
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::REPAYMENT,
-//         @Market::Repayment {
-//             repayer: setup.alice.contract_address,
-//             beneficiary: setup.alice.contract_address,
-//             token: setup.token_b.contract_address,
-//             raw_amount: 999999839667389988,
-//             face_amount: 1000000000000000000
-//         }
-//     );
+    spy.assert_emitted(
+        @array![
+            (
+                setup.market.contract_address,
+                Market::Event::AccumulatorsSync(
+                    Market::AccumulatorsSync {
+                        token: setup.token_b.contract_address,
+                        lending_accumulator: 10_00000000000000000000000000,
+                        debt_accumulator: 10_00000000000000000000000000
+                    }
+                )
+            ),
+            (
+                setup.market.contract_address,
+                Market::Event::Borrowing(
+                    Market::Borrowing {
+                        user: setup.alice.contract_address,
+                        token: setup.token_b.contract_address,
+                        raw_amount: 22_500000000000000000,
+                        face_amount: 22_500000000000000000
+                    }
+                )
+            )
+        ]
+    );
 
-//     // 100 seconds passed
-//     // starknet::testing::set_block_timestamp(400);
-//     start_cheat_block_timestamp_global(400);
+    // 100 seconds passed
+    start_cheat_block_timestamp_global(300);
 
+    // Accumulations:
+    //   Interest rate (see `test_borrow_token`):
+    //     Borrowing rate = 0.0505625
+    //     Lending rate = 0.000113765625
+    //   Lending accmulator:
+    //     1 * (1 + (100 * 0.000113765625 * (1 - 20%)) / (365 * 86400)) = 1.000000000288598744292237442
+    //   Debt accmulator:
+    //     1 * (1 + (100 * 0.0505625) / (365 * 86400)) = 1.000000160332635717909690512
 
-//     // Accumulations:
-//     //   Interest rate (see `test_debt_repayment`):
-//     //     Borrowing rate = 0.050537500089993205277538743
-//     //     Lending rate = 0.000108655643385611870596273
-//     //   Lending accmulator:
-//     //     1.000000000288598744292237442 * (1 + (100 * 0.000108655643385611870596273 * (1 - 20%)) / (365 * 86400))
-//     //     = 1.000000000564234572341374307
-//     //   Debt accmulator:
-//     //     1.000000160332635717909690512 * (1 + (100 * 0.050537500089993205277538743) / (365 * 86400))
-//     //     = 1.000000320586022935070387176
+    // Alice repays 1 TST_B
+    //   Raw amount repaid:
+    //     1 / 1.000000160332635717909690512 = 0.999999839667389988
+    setup
+        .alice
+        .erc20_approve(
+            setup.token_b.contract_address,
+            setup.market.contract_address, // spender
+            1000000000000000000 // amount
+        );
+    setup
+        .alice
+        .market_repay(
+            setup.market.contract_address,
+            setup.token_b.contract_address, // token
+            1000000000000000000 // amount
+        );
+    spy.assert_emitted(
+        @array![
+            (
+                setup.market.contract_address,
+                Market::Event::AccumulatorsSync(
+                    Market::AccumulatorsSync {
+                        token: setup.token_b.contract_address,
+                        lending_accumulator: 1000000000288598744292237442,
+                        debt_accumulator: 1000000160332635717909690512
+                    }
+                )
+            ),
+            (
+                setup.market.contract_address,
+                Market::Event::Repayment(
+                    Market::Repayment {
+                        repayer: setup.alice.contract_address,
+                        beneficiary: setup.alice.contract_address,
+                        token: setup.token_b.contract_address,
+                        raw_amount: 999999839667389988,
+                        face_amount: 1000000000000000000
+                    }
+                )
+            )
+        ]
+    );
 
-//     // Bob withdraws 5,000 TST_B
-//     setup
-//         .bob
-//         .market_withdraw(
-//             setup.market.contract_address,
-//             setup.token_b.contract_address, // token
-//             5000000000000000000000 // amount
-//         );
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::ACCUMULATORS_SYNC,
-//         @Market::AccumulatorsSync {
-//             token: setup.token_b.contract_address,
-//             lending_accumulator: 1000000000564234572341374307,
-//             debt_accumulator: 1000000320586022935070387176
-//         }
-//     );
-//     assert_event_emitted(
-//         setup.market.contract_address,
-//         event_keys::WITHDRAWAL,
-//         @Market::Withdrawal {
-//             user: setup.bob.contract_address,
-//             token: setup.token_b.contract_address,
-//             face_amount: 5000000000000000000000
-//         }
-//     );
-// }
+    // 100 seconds passed
+    start_cheat_block_timestamp_global(400);
+
+    // Accumulations:
+    //   Interest rate (see `test_debt_repayment`):
+    //     Borrowing rate = 0.050537500089993205277538743
+    //     Lending rate = 0.000108655643385611870596273
+    //   Lending accmulator:
+    //     1.000000000288598744292237442 * (1 + (100 * 0.000108655643385611870596273 * (1 - 20%)) / (365 * 86400))
+    //     = 1.000000000564234572341374307
+    //   Debt accmulator:
+    //     1.000000160332635717909690512 * (1 + (100 * 0.050537500089993205277538743) / (365 * 86400))
+    //     = 1.000000320586022935070387176
+
+    // Bob withdraws 5,000 TST_B
+    setup
+        .bob
+        .market_withdraw(
+            setup.market.contract_address,
+            setup.token_b.contract_address, // token
+            5000_000000000000000000 // amount
+        );
+    spy.assert_emitted(
+        @array![
+            (
+                setup.market.contract_address,
+                Market::Event::AccumulatorsSync(
+                    Market::AccumulatorsSync {
+                        token: setup.token_b.contract_address,
+                        lending_accumulator: 10_00000000564234572341374307,
+                        debt_accumulator: 10_00000320586022935070387176
+                    }
+                )
+            ),
+            (
+                setup.market.contract_address,
+                Market::Event::Withdrawal(
+                    Market::Withdrawal {
+                        user: setup.bob.contract_address,
+                        token: setup.token_b.contract_address,
+                        face_amount: 5000_000000000000000000
+                    }
+                )
+            )
+        ]
+    );
+}
 
 #[test]
 #[available_gas(90000000)]
@@ -1628,7 +1557,6 @@ fn test_change_interest_rate_model() {
     assert_eq!(@reserve_data.current_lending_rate, @113765625000000000000000, "FAILED");
     assert_eq!(@reserve_data.current_borrowing_rate, @50562500000000000000000000, "FAILED");
 
-        // starknet::testing::set_block_timestamp(100);
     start_cheat_block_timestamp_global(100);
 
 
@@ -1668,7 +1596,7 @@ fn test_change_interest_rate_model() {
     assert_eq!(@reserve_data.current_lending_rate, @1127531430778230877393893, "FAILED");
     assert_eq!(@reserve_data.current_borrowing_rate, @501125000179968373133515841, "FAILED");
 
-    // starknet::testing::set_block_timestamp(200);
+
     start_cheat_block_timestamp_global(200);
 
     // Another 100 seconds (accumulating with the new rate):
@@ -1751,7 +1679,6 @@ fn test_change_reserve_factor() {
     //   Utilization rate = 22.5 / 10,000 = 0.00225
     //   Borrowing rate = 0.05 + 0.2 * 0.00225 / 0.8 = 0.0505625 => 505625 * 10 ** 20
 
-        // starknet::testing::set_block_timestamp(100);
     start_cheat_block_timestamp_global(100);
 
 
@@ -1783,7 +1710,6 @@ fn test_change_reserve_factor() {
         );
 
     // Trigger another settlement after 100 seconds
-    // starknet::testing::set_block_timestamp(200);
     start_cheat_block_timestamp_global(200);
 
     setup
