@@ -117,6 +117,7 @@ fn setup() -> Setup {
         .market_set_treasury(
             setup.market.contract_address, MOCK_TREASURY_ADDRESS()
         );
+
     setup
         .alice
         .market_add_reserve(
@@ -124,11 +125,11 @@ fn setup() -> Setup {
             setup.token_a.contract_address, // token
             setup.z_token_a.contract_address, // z_token
             setup.irm_a.contract_address, // interest_rate_model
-            500000000000000000000000000, // collateral_factor
-            800000000000000000000000000, // borrow_factor
-            100000000000000000000000000, // reserve_factor
-            50000000000000000000000000, // flash_loan_fee
-            200000000000000000000000000, // liquidation_bonus
+            50_0000000000000000000000000, // collateral_factor
+            80_0000000000000000000000000, // borrow_factor
+            10_0000000000000000000000000, // reserve_factor
+            5_0000000000000000000000000, // flash_loan_fee
+            20_0000000000000000000000000, // liquidation_bonus
         );
     setup
         .alice
@@ -137,11 +138,11 @@ fn setup() -> Setup {
             setup.token_b.contract_address, // token
             setup.z_token_b.contract_address, // z_token
             setup.irm_b.contract_address, // interest_rate_model
-            750000000000000000000000000, // collateral_factor
-            900000000000000000000000000, // borrow_factor
-            200000000000000000000000000, // reserve_factor
-            10000000000000000000000000, // flash_loan_fee
-            100000000000000000000000000, // liquidation_bonus
+            75_0000000000000000000000000, // collateral_factor
+            90_0000000000000000000000000, // borrow_factor
+            20_0000000000000000000000000, // reserve_factor
+            1_0000000000000000000000000, // flash_loan_fee
+            10_0000000000000000000000000, // liquidation_bonus
         );
 
     setup
@@ -185,14 +186,14 @@ fn setup_with_alice_deposit() -> Setup {
         .erc20_approve(
             setup.token_a.contract_address,
             setup.market.contract_address, // spender
-            100000000000000000000 // amount
+            100_000000000000000000 // amount
         );
     setup
         .alice
         .market_deposit(
             setup.market.contract_address,
             setup.token_a.contract_address, // token
-            100000000000000000000 // amount
+            100_000000000000000000 // amount
         );
     setup
         .alice
@@ -209,14 +210,14 @@ fn setup_with_alice_and_bob_deposit() -> Setup {
         .erc20_approve(
             setup.token_b.contract_address,
             setup.market.contract_address, // spender
-            1000000000000000000000000 // amount
+            1000000_000000000000000000 // amount
         );
     setup
         .bob
         .market_deposit(
             setup.market.contract_address,
             setup.token_b.contract_address, // token
-            10000000000000000000000 // amount
+            10000_000000000000000000 // amount
         );
     setup
         .bob
@@ -233,7 +234,7 @@ fn setup_with_loan() -> Setup {
         .market_borrow(
             setup.market.contract_address,
             setup.token_b.contract_address, // token
-            22500000000000000000 // amount
+            22_500000000000000000 // amount
         );
 
     setup
@@ -909,6 +910,9 @@ fn test_interest_accumulation() {
     //   Interest = 0.000113765625 * 10000 * 100 * (1 - 20%) / (365 * 86400) = 0.000002885987442922374429223
     //                                                         => 2885987442922
     //   Total balance = 10000 * 10 ** 18 + 2885987442922
+    // @10000000003607484303652
+    // @10000000002885987442922
+    // @10000000003607484303652
     assert_eq!(
         @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000002885987442922, "FAILED"
     );
@@ -1570,12 +1574,12 @@ fn test_flashloan_fee_distribution() {
         .erc20_transfer(
             setup.token_b.contract_address,
             callback.contract_address, // recipient
-            1100000000000000000000 // amount
+            1100_000000000000000000 // amount
         );
 
     // Bob has 10,000 TST_B as collateral now
     assert_eq!(
-        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000000000000000000000, "FAILED"
+        @setup.z_token_b.balanceOf(setup.bob.contract_address), @10000_000000000000000000, "FAILED"
     );
 
     // Flashloan pays 100 TST_B as fee
@@ -1583,21 +1587,21 @@ fn test_flashloan_fee_distribution() {
         .take_flash_loan(
             setup.market.contract_address, // market_addr
             setup.token_b.contract_address, // token
-            1000000000000000000000, // amount
-            1100000000000000000000 // return_amount
+            1000_000000000000000000, // amount
+            1100_000000000000000000 // return_amount
         );
 
     // Bob should has 10,080 TST_B now as the only depositor
     // (reserve takes 20% of the fees)
     assert_approximatedly_equals(
-        setup.z_token_b.balanceOf(setup.bob.contract_address), 10080000000000000000000, 1
+        setup.z_token_b.balanceOf(setup.bob.contract_address), 10080_000000000000000000, 1
     );
     assert_approximatedly_equals(
         setup.z_token_b.balanceOf(MOCK_TREASURY_ADDRESS()),
-        20000000000000000000,
+        20_000000000000000000,
         1
     );
-    assert_approximatedly_equals(setup.z_token_b.totalSupply(), 10100000000000000000000, 1);
+    assert_approximatedly_equals(setup.z_token_b.totalSupply(), 10100_000000000000000000, 1);
 
     // Borrowing rate:
     //   Utilization rate = 22.5 / 10,100 = 0.002227722772277227722772277

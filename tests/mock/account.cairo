@@ -53,7 +53,7 @@ pub mod Account {
             contract_address: ContractAddress,
             new_treasury: ContractAddress
         ) {
-            // IMarketDispatcher { contract_address }.set_treasury(new_treasury)
+            IMarketDispatcher { contract_address }.set_treasury(new_treasury)
         }
 
         fn market_set_interest_rate_model(
