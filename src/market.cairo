@@ -18,12 +18,11 @@ pub mod Market {
     // Hack to simulate the `crate` keyword
     // use super::super as crate;
 
-    use zklend_v2::interfaces::{IMarket, MarketReserveData, ReservesStorageShortcuts};
+    use zklend_v2::interfaces::{IMarket, MarketReserveData};
 
     use super::{external, view};
 
-    use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
-    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
+    use starknet::storage::Map;
 
 
     #[storage]
@@ -41,9 +40,9 @@ pub mod Market {
         /// Bit 2: whether reserve #1 is used as collateral
         /// Bit 3: whether user has debt in reserve #1
         /// ...
-        pub user_flags: LegacyMap::<ContractAddress, felt252>,
+        pub user_flags: Map::<ContractAddress, felt252>,
         // (user, token) -> debt
-        pub raw_user_debts: LegacyMap::<(ContractAddress, ContractAddress), felt252>,
+        pub raw_user_debts: Map::<(ContractAddress, ContractAddress), felt252>,
         // This weird naming is to maintain backward compatibility with the Cairo 0 version
         pub Ownable_owner: ContractAddress,
         // Used in `reentrancy_guard`

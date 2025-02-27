@@ -135,59 +135,6 @@ pub trait IMarket<TContractState> {
 }
 
 #[starknet::interface]
-pub trait ReservesStorageShortcuts<T> {
-    fn read_enabled(self: @T, token: ContractAddress) -> bool;
-    fn read_decimals(self: @T, token: ContractAddress) -> felt252;
-    fn read_z_token_address(self: @T, token: ContractAddress) -> ContractAddress;
-    fn read_borrow_factor(self: @T, token: ContractAddress) -> felt252;
-    fn read_raw_total_debt(self: @T, token: ContractAddress) -> felt252;
-    fn read_flash_loan_fee(self: @T, token: ContractAddress) -> felt252;
-    fn read_debt_limit(self: @T, token: ContractAddress) -> felt252;
-    fn read_deposit_limit(self: @T, token: ContractAddress) -> felt252;
-    fn read_interest_rate_model_and_raw_total_debt(
-        self: @T, token: ContractAddress,
-    ) -> (ContractAddress, felt252);
-    fn read_for_get_user_collateral_usd_value_for_token(
-        self: @T, token: ContractAddress,
-    ) -> (felt252, ContractAddress, felt252);
-    fn read_for_get_lending_accumulator(
-        self: @T, token: ContractAddress,
-    ) -> (felt252, felt252, felt252, felt252);
-    fn read_for_get_debt_accumulator(
-        self: @T, token: ContractAddress,
-    ) -> (felt252, felt252, felt252);
-    fn read_for_get_pending_treasury_amount(
-        self: @T, token: ContractAddress,
-    ) -> (ContractAddress, felt252, felt252, felt252, felt252);
-    fn read_for_settle_extra_reserve_balance(
-        self: @T, token: ContractAddress,
-    ) -> (ContractAddress, felt252, felt252, felt252, felt252);
-    fn write_lending_accumulator(ref self: T, token: ContractAddress, lending_accumulator: felt252);
-    fn write_raw_total_debt(ref self: T, token: ContractAddress, raw_total_debt: felt252);
-    fn write_interest_rate_model(
-        ref self: T, token: ContractAddress, interest_rate_model: ContractAddress,
-    );
-    fn write_collateral_factor(ref self: T, token: ContractAddress, collateral_factor: felt252);
-    fn write_borrow_factor(ref self: T, token: ContractAddress, borrow_factor: felt252);
-    fn write_reserve_factor(ref self: T, token: ContractAddress, reserve_factor: felt252);
-    fn write_debt_limit(ref self: T, token: ContractAddress, debt_limit: felt252);
-    fn write_deposit_limit(ref self: T, token: ContractAddress, deposit_limit: felt252);
-    fn write_accumulators(
-        ref self: T,
-        token: ContractAddress,
-        last_update_timestamp: felt252,
-        lending_accumulator: felt252,
-        debt_accumulator: felt252,
-    );
-    fn write_rates(
-        ref self: T,
-        token: ContractAddress,
-        current_lending_rate: felt252,
-        current_borrowing_rate: felt252,
-    );
-}
-
-#[starknet::interface]
 pub trait IZToken<TContractState> {
     //
     // Getters
