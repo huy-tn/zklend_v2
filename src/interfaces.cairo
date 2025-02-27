@@ -1,7 +1,7 @@
 use starknet::{ClassHash, ContractAddress};
 
 #[starknet::interface]
-trait ITestContract<TContractState> {
+pub trait ITestContract<TContractState> {
     fn get_value(self: @TContractState) -> felt252;
 
     fn set_value(ref self: TContractState, value: felt252);

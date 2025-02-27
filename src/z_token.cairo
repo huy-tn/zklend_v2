@@ -5,7 +5,7 @@ mod traits;
 mod errors;
 
 #[starknet::contract]
-mod ZToken {
+pub mod ZToken {
     use core::array::SpanTrait;
 
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
