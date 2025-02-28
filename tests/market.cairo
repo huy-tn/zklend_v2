@@ -53,7 +53,7 @@ fn pre_setup() -> Setup {
         'Test Token A', // name
         'TST_A', // symbol
         18, // decimals
-        1000000000000000000000000, // initial_supply
+        1000000_000000000000000000, // initial_supply
         alice.contract_address // recipient
     );
     let z_token_a = deploy::deploy_z_token(
@@ -75,7 +75,7 @@ fn pre_setup() -> Setup {
         'Test Token B', // name
         'TST_B', // symbol
         18, // decimals
-        1000000000000000000000000, // initial_supply
+        1000000_000000000000000000, // initial_supply
         bob.contract_address // recipient
     );
     let z_token_b = deploy::deploy_z_token(
@@ -1795,4 +1795,113 @@ fn test_prelisted_token_may_have_price_source_unset() {
             setup.token_b.contract_address, // token
             22500000000000000000 // amount
         );
+}
+
+#[test]
+#[available_gas(90000000)]
+fn test_flashloan_extreme_overpayment() {
+    // Setup initial state with minimal deposit
+    let setup = pre_setup();
+    let mut spy = spy_events();
+
+    // Configure treasury
+    setup.alice.market_set_treasury(setup.market.contract_address, MOCK_TREASURY_ADDRESS());
+
+    // Add reserve for token_a with minimal parameters
+    setup.alice.market_add_reserve(
+        setup.market.contract_address,
+        setup.token_a.contract_address, // token
+        setup.z_token_a.contract_address, // z_token
+        setup.irm_a.contract_address, // interest_rate_model
+        50_0000000000000000000000000, // collateral_factor
+        80_0000000000000000000000000, // borrow_factor
+        15_0000000000000000000000000, // reserve_factor (20%)
+        1_0000000000000000000000000, // flash_loan_fee (0.1%)
+        20_0000000000000000000000000 // liquidation_bonus
+    );
+
+    // Alice sends A token to Bob
+    setup.alice.erc20_approve(
+        setup.token_a.contract_address,
+        setup.bob.contract_address, // spender (for transfer)
+        1_000000000000000000 // amount
+    );
+    setup.alice.erc20_transfer(
+        setup.token_a.contract_address,
+        setup.bob.contract_address, // spender (for transfer)
+        1_000000000000000000 // amount
+    );
+
+    // Bob deposits 1 wei to the market
+    setup.bob.erc20_approve(
+        setup.token_a.contract_address,
+        setup.market.contract_address, // spender
+        10000 // amount (1 wei)
+    );
+
+    // assert_eq!(1, 5);
+    setup.bob.market_deposit(
+        setup.market.contract_address,
+        setup.token_a.contract_address, // token
+        1 // amount (1 wei)
+    );
+
+
+    // Verify initial state
+    assert_eq!(
+        @setup.token_a.balanceOf(setup.market.contract_address), @1, "Initial contract balance should be 1 wei"
+    );
+    assert_eq!(
+        @setup.z_token_a.balanceOf(setup.bob.contract_address), @1, "Bob should have 1 ZToken"
+    );
+    // assert_eq!(
+    //     @setup.z_token_b.totalSupply(), @1, "Initial ZToken supply should be 1 wei"
+    // );
+    assert_eq!(
+        @setup.market.get_lending_accumulator(setup.token_a.contract_address), 
+        @1_000000000000000000000000000, // 1.0 * SCALE
+        "Initial lending accumulator should be 1.0 * SCALE"
+    );
+
+    // Deploy flash loan handler
+    let callback = deploy::deploy_flash_loan_handler();
+
+    // Bob sends at least 1000 wei to callback contract to fund the repayment
+    setup.bob.erc20_approve(
+        setup.token_a.contract_address,
+        callback.contract_address, // spender (for transfer)
+        1000
+    );
+    setup.bob.erc20_transfer(
+        setup.token_a.contract_address,
+        callback.contract_address, // recipient
+        1000 // amount
+    );
+
+    // Execute flash loan: borrow 1 wei, repay 1000 wei
+    callback.take_flash_loan(
+        setup.market.contract_address, // market_addr
+        setup.token_a.contract_address, // token
+        1, // amount (1 wei)
+        1000 // return_amount (1000 wei)
+    );
+
+    // Verify post-settlement state
+    assert_eq!(
+        @setup.token_a.balanceOf(setup.market.contract_address), @1000, "Contract balance should be 1000 wei"
+    );
+    assert_eq!(
+        @setup.market.get_lending_accumulator(setup.token_a.contract_address),
+        @851_000000000000000000000000000, // 1.0 * SCALE
+    );
+    assert_eq!(
+        @setup.z_token_a.balanceOf(MOCK_TREASURY_ADDRESS()), @0, "Treasury should still have 149 ZToken"
+    );
+    assert_eq!(
+        @setup.z_token_a.totalSupply(), @851, "Total Z supply be 1"
+    );
+    // ZToken balances (raw values)
+    assert_eq!(
+        @setup.z_token_a.balanceOf(setup.bob.contract_address), @851, "Bob should still have 1 ZToken"
+    );
 }
